@@ -44,13 +44,14 @@ Partial Class MainForm
         Me.M_exit = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.МенюToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ДобавитьКаталогToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ОбновитьДанныеToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ИгнорируемыеТипыФайловToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.СохранитьСписокВФайлToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ОчиститьБазуДанныхToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.НастройкиToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ВыходToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.addFolder = New System.Windows.Forms.ToolStripMenuItem()
+        Me.addFile = New System.Windows.Forms.ToolStripMenuItem()
+        Me.UpdateList = New System.Windows.Forms.ToolStripMenuItem()
+        Me.IgnoreFile = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SaveList = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ClearDB = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SetupPrg = New System.Windows.Forms.ToolStripMenuItem()
+        Me.Exitmnu = New System.Windows.Forms.ToolStripMenuItem()
         Me.ОПрограммеToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TableLayoutPanel2 = New System.Windows.Forms.TableLayoutPanel()
         Me.lvFilesF = New System.Windows.Forms.ListView()
@@ -220,63 +221,71 @@ Partial Class MainForm
         '
         'МенюToolStripMenuItem
         '
-        Me.МенюToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ДобавитьКаталогToolStripMenuItem, Me.ОбновитьДанныеToolStripMenuItem, Me.ИгнорируемыеТипыФайловToolStripMenuItem, Me.СохранитьСписокВФайлToolStripMenuItem, Me.ОчиститьБазуДанныхToolStripMenuItem, Me.НастройкиToolStripMenuItem, Me.ВыходToolStripMenuItem})
+        Me.МенюToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFolder, Me.addFile, Me.UpdateList, Me.IgnoreFile, Me.SaveList, Me.ClearDB, Me.SetupPrg, Me.Exitmnu})
         Me.МенюToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.service
         Me.МенюToolStripMenuItem.Name = "МенюToolStripMenuItem"
         Me.МенюToolStripMenuItem.Size = New System.Drawing.Size(69, 20)
         Me.МенюToolStripMenuItem.Text = "Меню"
         '
-        'ДобавитьКаталогToolStripMenuItem
+        'addFolder
         '
-        Me.ДобавитьКаталогToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.add
-        Me.ДобавитьКаталогToolStripMenuItem.Name = "ДобавитьКаталогToolStripMenuItem"
-        Me.ДобавитьКаталогToolStripMenuItem.Size = New System.Drawing.Size(235, 22)
-        Me.ДобавитьКаталогToolStripMenuItem.Text = "Добавить каталог"
+        Me.addFolder.Image = Global.HASHER.My.Resources.Resources.fadd
+        Me.addFolder.Name = "addFolder"
+        Me.addFolder.Size = New System.Drawing.Size(235, 22)
+        Me.addFolder.Text = "Добавить каталог"
         '
-        'ОбновитьДанныеToolStripMenuItem
+        'addFile
         '
-        Me.ОбновитьДанныеToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.pcupdate
-        Me.ОбновитьДанныеToolStripMenuItem.Name = "ОбновитьДанныеToolStripMenuItem"
-        Me.ОбновитьДанныеToolStripMenuItem.Size = New System.Drawing.Size(235, 22)
-        Me.ОбновитьДанныеToolStripMenuItem.Text = "Обновить данные"
+        Me.addFile.Image = Global.HASHER.My.Resources.Resources.add
+        Me.addFile.Name = "addFile"
+        Me.addFile.Size = New System.Drawing.Size(235, 22)
+        Me.addFile.Text = "Добавить файл"
         '
-        'ИгнорируемыеТипыФайловToolStripMenuItem
+        'UpdateList
         '
-        Me.ИгнорируемыеТипыФайловToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.B8
-        Me.ИгнорируемыеТипыФайловToolStripMenuItem.Name = "ИгнорируемыеТипыФайловToolStripMenuItem"
-        Me.ИгнорируемыеТипыФайловToolStripMenuItem.Size = New System.Drawing.Size(235, 22)
-        Me.ИгнорируемыеТипыФайловToolStripMenuItem.Text = "Игнорируемые типы файлов"
+        Me.UpdateList.Image = Global.HASHER.My.Resources.Resources.pcupdate
+        Me.UpdateList.Name = "UpdateList"
+        Me.UpdateList.Size = New System.Drawing.Size(235, 22)
+        Me.UpdateList.Text = "Обновить данные"
         '
-        'СохранитьСписокВФайлToolStripMenuItem
+        'IgnoreFile
         '
-        Me.СохранитьСписокВФайлToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.save
-        Me.СохранитьСписокВФайлToolStripMenuItem.Name = "СохранитьСписокВФайлToolStripMenuItem"
-        Me.СохранитьСписокВФайлToolStripMenuItem.Size = New System.Drawing.Size(235, 22)
-        Me.СохранитьСписокВФайлToolStripMenuItem.Text = "Сохранить список в файл"
+        Me.IgnoreFile.Image = Global.HASHER.My.Resources.Resources.B8
+        Me.IgnoreFile.Name = "IgnoreFile"
+        Me.IgnoreFile.Size = New System.Drawing.Size(235, 22)
+        Me.IgnoreFile.Text = "Игнорируемые типы файлов"
         '
-        'ОчиститьБазуДанныхToolStripMenuItem
+        'SaveList
         '
-        Me.ОчиститьБазуДанныхToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.servnz
-        Me.ОчиститьБазуДанныхToolStripMenuItem.Name = "ОчиститьБазуДанныхToolStripMenuItem"
-        Me.ОчиститьБазуДанныхToolStripMenuItem.Size = New System.Drawing.Size(235, 22)
-        Me.ОчиститьБазуДанныхToolStripMenuItem.Text = "Очистить базу данных"
+        Me.SaveList.Image = Global.HASHER.My.Resources.Resources.save
+        Me.SaveList.Name = "SaveList"
+        Me.SaveList.Size = New System.Drawing.Size(235, 22)
+        Me.SaveList.Text = "Сохранить список в файл"
         '
-        'НастройкиToolStripMenuItem
+        'ClearDB
         '
-        Me.НастройкиToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.setup
-        Me.НастройкиToolStripMenuItem.Name = "НастройкиToolStripMenuItem"
-        Me.НастройкиToolStripMenuItem.Size = New System.Drawing.Size(235, 22)
-        Me.НастройкиToolStripMenuItem.Text = "Настройки"
+        Me.ClearDB.Image = Global.HASHER.My.Resources.Resources.servnz
+        Me.ClearDB.Name = "ClearDB"
+        Me.ClearDB.Size = New System.Drawing.Size(235, 22)
+        Me.ClearDB.Text = "Очистить базу данных"
         '
-        'ВыходToolStripMenuItem
+        'SetupPrg
         '
-        Me.ВыходToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources._exit
-        Me.ВыходToolStripMenuItem.Name = "ВыходToolStripMenuItem"
-        Me.ВыходToolStripMenuItem.Size = New System.Drawing.Size(235, 22)
-        Me.ВыходToolStripMenuItem.Text = "Выход"
+        Me.SetupPrg.Image = Global.HASHER.My.Resources.Resources.setup
+        Me.SetupPrg.Name = "SetupPrg"
+        Me.SetupPrg.Size = New System.Drawing.Size(235, 22)
+        Me.SetupPrg.Text = "Настройки"
+        '
+        'Exitmnu
+        '
+        Me.Exitmnu.Image = Global.HASHER.My.Resources.Resources._exit
+        Me.Exitmnu.Name = "Exitmnu"
+        Me.Exitmnu.Size = New System.Drawing.Size(235, 22)
+        Me.Exitmnu.Text = "Выход"
         '
         'ОПрограммеToolStripMenuItem
         '
+        Me.ОПрограммеToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
         Me.ОПрограммеToolStripMenuItem.Name = "ОПрограммеToolStripMenuItem"
         Me.ОПрограммеToolStripMenuItem.Size = New System.Drawing.Size(94, 20)
         Me.ОПрограммеToolStripMenuItem.Text = "&О программе"
@@ -414,16 +423,16 @@ Partial Class MainForm
     Friend WithEvents МенюToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ОПрограммеToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents TableLayoutPanel2 As System.Windows.Forms.TableLayoutPanel
-    Friend WithEvents ДобавитьКаталогToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ОбновитьДанныеToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ВыходToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ОчиститьБазуДанныхToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents addFolder As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents UpdateList As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents Exitmnu As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ClearDB As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents UpdateData As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripStatusLabel1 As System.Windows.Forms.ToolStripStatusLabel
     Friend WithEvents stat2 As System.Windows.Forms.ToolStripStatusLabel
-    Friend WithEvents ИгнорируемыеТипыФайловToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents СохранитьСписокВФайлToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents НастройкиToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents IgnoreFile As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents SaveList As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents SetupPrg As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ni As System.Windows.Forms.NotifyIcon
     Friend WithEvents cmenuNI As System.Windows.Forms.ContextMenuStrip
     Friend WithEvents РазвернутьToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
@@ -435,4 +444,5 @@ Partial Class MainForm
     Friend WithEvents notfind As System.Windows.Forms.ToolStripStatusLabel
     Friend WithEvents lvFilesF As System.Windows.Forms.ListView
     Friend WithEvents lvFilesR As System.Windows.Forms.ListView
+    Friend WithEvents addFile As System.Windows.Forms.ToolStripMenuItem
 End Class

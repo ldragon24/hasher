@@ -74,10 +74,10 @@ Public Class MainForm
         ni.Visible = False
 
 
-
     End Sub
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
+
 
         LoadDatabase()
 
@@ -88,8 +88,7 @@ Public Class MainForm
         lvFiles.Columns.Add(("Контрольная сумма"), 100, HorizontalAlignment.Left)
         lvFiles.Columns.Add(("Проверка"), 30, HorizontalAlignment.Left)
         lvFiles.Columns.Add(("Дата"), 30, HorizontalAlignment.Left)
-
-
+        'lvFiles.Columns.Add(("Размер файла"), 30, HorizontalAlignment.Left)
 
         lvFilesR.Columns.Add(("id"), 20, HorizontalAlignment.Left)
         lvFilesR.Columns.Add(("Имя файла"), 100, HorizontalAlignment.Left)
@@ -104,8 +103,9 @@ Public Class MainForm
 
         Call typeCRCLoad()
 
-        Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
+
+        Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
 
         ThrTIMER_ = New System.Threading.Thread(AddressOf ThrTIMER)
@@ -117,6 +117,9 @@ Public Class MainForm
     End Sub
 
     Public Sub LoadData()
+
+
+        Me.Cursor = Cursors.WaitCursor
 
         Dim sCOUNT As Integer
         Dim sSQL As String
@@ -137,19 +140,21 @@ Public Class MainForm
 
             Case 0
                 stlabel.Text = "Записей в базе не найдено"
-                ОбновитьДанныеToolStripMenuItem.Enabled = False
-                ОчиститьБазуДанныхToolStripMenuItem.Enabled = False
+                UpdateList.Enabled = False
+                ClearDB.Enabled = False
             Case Else
 
                 stlabel.Text = "Записей в базе: " & sCOUNT
-                ОбновитьДанныеToolStripMenuItem.Enabled = True
-                ОчиститьБазуДанныхToolStripMenuItem.Enabled = True
+                UpdateList.Enabled = True
+                ClearDB.Enabled = True
                 Call find_file_re()
 
         End Select
 
         ResList(lvFiles)
 
+
+        Me.Cursor = Cursors.Default
     End Sub
 
     Private Sub ADD_DIR()
@@ -220,14 +225,14 @@ Public Class MainForm
 
                 Case Else
 
-                   Exit Sub
+                    Exit Sub
 
             End Select
 
         Catch ex As Exception
 
         End Try
-       
+
 
         ' sSQL = "INSERT INTO [TBL_HASH]([file],[hash],[dttm]) VALUES(@item1,@item2,@item3)"
 
@@ -383,6 +388,10 @@ Public Class MainForm
     End Sub
 
     Private Sub find_file_re()
+
+        Me.Cursor = Cursors.WaitCursor
+
+
         lvFiles.Sorting = SortOrder.None
         lvFiles.ListViewItemSorter = Nothing
         lvFiles.Items.Clear()
@@ -444,6 +453,7 @@ Public Class MainForm
 
             rs = New Recordset
             rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
 
             With rs
                 .MoveFirst()
@@ -592,7 +602,13 @@ Public Class MainForm
                         lvFiles.Items(CInt(intcount)).SubItems.Add("")
                     End If
 
+
+                    ' Dim f As New IO.FileInfo(.Fields("file").Value)
+                    ' lvFiles.Items(CInt(intcount)).SubItems.Add(f.Length)
+
                     intcount = intcount + 1
+
+                    Application.DoEvents()
 
                     .MoveNext()
                 Loop
@@ -648,6 +664,7 @@ Public Class MainForm
 
         End Select
 
+        Me.Cursor = Cursors.Default
         ResList(lvFiles)
     End Sub
 
@@ -825,7 +842,37 @@ Public Class MainForm
             Next
 
 
-            Dim newHash As String = GetHash(lvFiles.SelectedItems(intj).SubItems(1).Text)
+            Dim newHash As String ' = GetHash(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+
+            Select Case typeCRC
+
+                Case "MD5"
+                    newHash = GetHash(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+                Case "Crc32"
+
+                    newHash = GetCRC32(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+                Case "SHA256"
+
+                    newHash = GetSHA256(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+                Case "SHA512"
+
+                    newHash = GetSHA512(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+                Case "SHA1"
+
+                    newHash = GetSHA1(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+                Case Else
+
+                    MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
+
+                    frmChS.ShowDialog(Me)
+
+            End Select
 
             Dim sSQL As String
             ' sSQL = "UPDATE [TBL_HASH] SET [hash]=@item1,[dttm]=@item2 WHERE id=@id"
@@ -919,27 +966,63 @@ Public Class MainForm
 
             DB7.Execute(sSQL)
 
+            COMPARE_DB()
+
+            If IO.File.Exists(Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\change.log") Then
+
+                IO.File.Delete((Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\change.log"))
+
+            End If
+
         End If
+        lvFiles.Items.Clear()
 
         Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
     End Sub
 
-    Private Sub ДобавитьКаталогToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ДобавитьКаталогToolStripMenuItem.Click
+    Public Sub COMPARE_DB()
+
+        Dim JRO As JRO.JetEngine
+
+        Try
+
+            UnLoadDatabase()
+
+            Dim sBname As String
+            sBname = "temp_" & Base_Name
+
+            JRO = New JRO.JetEngine
+
+            JRO.CompactDatabase("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & Base_Name, "Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & sBname)
+            Kill(Base_Name)
+            Rename(sBname, Base_Name)
+            LoadDatabase()
+
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)
+            LoadDatabase()
+        Finally
+            JRO = Nothing
+        End Try
+
+    End Sub
+
+    Private Sub ДобавитьКаталогToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles addFolder.Click
         Call ADD_DIR()
     End Sub
 
-    Private Sub ОбновитьДанныеToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ОбновитьДанныеToolStripMenuItem.Click
-      
+    Private Sub ОбновитьДанныеToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UpdateList.Click
+
         Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
     End Sub
 
-    Private Sub ОчиститьБазуДанныхToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ОчиститьБазуДанныхToolStripMenuItem.Click
+    Private Sub ОчиститьБазуДанныхToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearDB.Click
         Call All_Delete()
     End Sub
 
-    Private Sub ВыходToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ВыходToolStripMenuItem.Click
+    Private Sub ВыходToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles Exitmnu.Click
 
         If MsgBox("Работа программы будет завершена" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
@@ -960,7 +1043,7 @@ Public Class MainForm
         frmAbout.ShowDialog(Me)
     End Sub
 
-    Private Sub ИгнорируемыеТипыФайловToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ИгнорируемыеТипыФайловToolStripMenuItem.Click
+    Private Sub ИгнорируемыеТипыФайловToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles IgnoreFile.Click
         frmAdd_type.ShowDialog(Me)
     End Sub
 
@@ -986,7 +1069,7 @@ Public Class MainForm
     '    xls.Quit()
     'End Sub
 
-    Private Sub СохранитьСписокВФайлToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles СохранитьСписокВФайлToolStripMenuItem.Click
+    Private Sub СохранитьСписокВФайлToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveList.Click
         Dim saveFileDialog1 As New SaveFileDialog
         ' saveFileDialog1.Filter = "Excel File|*.xlsx"
         ' saveFileDialog1.Title = "Сохранить в формате Excel"
@@ -1018,7 +1101,7 @@ Public Class MainForm
         CSVWriter.Close()
     End Sub
 
-    Private Sub НастройкиToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles НастройкиToolStripMenuItem.Click
+    Private Sub НастройкиToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SetupPrg.Click
         frmChS.ShowDialog(Me)
     End Sub
 
@@ -1213,7 +1296,6 @@ Public Class MainForm
 
     Private Sub notfind_Click(sender As Object, e As EventArgs) Handles notfind.Click
 
-
         Select Case notfind.Text
 
             Case "Все файлы в наличии"
@@ -1244,6 +1326,67 @@ Public Class MainForm
                 frmExFile.ShowDialog(Me)
 
         End Select
+
+    End Sub
+
+    Private Sub addFile_Click(sender As Object, e As EventArgs) Handles addFile.Click
+        Dim fdlg As OpenFileDialog = New OpenFileDialog()
+
+        fdlg.Title = "Выбор файла"
+        fdlg.InitialDirectory = Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString
+        fdlg.Filter = "Все файлы (*.*)|*.*"
+        fdlg.FilterIndex = 2
+
+        fdlg.RestoreDirectory = True
+
+        If fdlg.ShowDialog() = DialogResult.OK Then
+            Me.Cursor = Cursors.WaitCursor
+
+            ' EverestFilePatch = fdlg.FileName
+
+            Dim thisHash As String
+
+            Select Case typeCRC
+
+                Case "MD5"
+                    thisHash = GetHash(fdlg.FileName)
+
+                Case "Crc32"
+
+                    thisHash = GetCRC32(fdlg.FileName)
+
+                Case "SHA256"
+
+                    thisHash = GetSHA256(fdlg.FileName)
+
+                Case "SHA512"
+
+                    thisHash = GetSHA512(fdlg.FileName)
+
+                Case "SHA1"
+
+                    thisHash = GetSHA1(fdlg.FileName)
+
+                Case Else
+
+                    MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
+
+                    frmChS.ShowDialog(Me)
+
+            End Select
+
+            If Not RSExistsHash(fdlg.FileName) Then
+                ADD_DB_HASH(fdlg.FileName, thisHash, DateAndTime.Now)
+            End If
+
+            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+
+        Else
+
+
+        End If
+
+        Me.Cursor = Cursors.Default
 
     End Sub
 End Class

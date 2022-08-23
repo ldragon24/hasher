@@ -78,6 +78,11 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Interop.JRO, Version=2.6.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\BASE_CODE_FOR_\Interop.JRO.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
@@ -94,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Import Include="ADODB" />
+    <Import Include="JRO" />
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
     <Import Include="System.Collections" />
@@ -157,6 +163,7 @@
   <ItemGroup>
     <EmbeddedResource Include="FORMS\frmAbout.resx">
       <DependentUpon>frmAbout.vb</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="FORMS\frmAdd_type.resx">
       <DependentUpon>frmAdd_type.vb</DependentUpon>
@@ -169,6 +176,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FORMS\frmMain.resx">
       <DependentUpon>frmMain.vb</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
@@ -193,6 +201,8 @@
   <ItemGroup>
     <Content Include="chat-icon.ico" />
     <Content Include="Home.ico" />
+    <None Include="Resources\E9.png" />
+    <None Include="Resources\fadd.png" />
     <None Include="Resources\setup.png" />
     <None Include="Resources\B8.png" />
     <None Include="Resources\save.png" />
