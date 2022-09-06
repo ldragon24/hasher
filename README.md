@@ -1,5 +1,8 @@
 # hasher
 
+![Интерфейс программы](http://bko.shatki.info/images/stories/has1.png "Интерфейс программы")
+
+
 [Скачать программу](https://github.com/ldragon24/hasher/blob/main/PROGRAMM/HASHER.7z "скачать программу")
 
 [Описание программы](https://github.com/ldragon24/hasher/blob/main/PROGRAMM/%D0%9F%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%20Hasher.docx "Описание программы")
