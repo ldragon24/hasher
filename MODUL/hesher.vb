@@ -32,20 +32,10 @@ Module hasher
         Return hex_value.ToLower
     End Function
 
-    Public Sub ResList(ByVal resizingListView As ListView)
-
-        Dim columnIndex As Integer
-
-        For columnIndex = 1 To resizingListView.Columns.Count - 1
-            resizingListView.AutoResizeColumn(columnIndex, ColumnHeaderAutoResizeStyle.HeaderSize)
-        Next
-
-    End Sub
-
     Public Function GetSHA256(ByVal sfile As String) As String
 
         Dim stmp As String
-       Try
+        Try
             Using _sha512 As New System.Security.Cryptography.SHA256CryptoServiceProvider
 
                 Using stream = File.OpenRead(sfile)

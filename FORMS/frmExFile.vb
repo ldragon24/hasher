@@ -1,9 +1,5 @@
 ﻿Public Class frmExFile
 
-
-
-
-
     Private Sub frmExFile_Load(sender As Object, e As EventArgs) Handles Me.Load
 
         lvFilesR.Columns.Clear()

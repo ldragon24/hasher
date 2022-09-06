@@ -2,6 +2,7 @@
 Imports System
 Imports System.IO
 'Imports System.Data.OleDb
+'Imports ADOX
 
 Module MOD_DATABASE
 
@@ -15,6 +16,29 @@ Module MOD_DATABASE
     Public TIME_TOOL_TIPS As Integer = 20
     Private m_SortingColumn As ColumnHeader
 
+    Public Sub CREATE_DATABASE()
+
+        'Dim cat As New ADOX.Catalog
+        'Dim sSQL As String
+
+        'cat.Create("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & BP & "\" & Base_Name & ";Jet OLEDB:Engine Type=5")
+        'cat = Nothing
+
+        'sSQL = "CREATE TABLE [TBL_CONF] ([id] counter, [type] varchar(255))"
+
+        'DB7.Execute(sSQL)
+
+        'sSQL = "CREATE TABLE [TBL_IGNORE] ([id] counter, [type] varchar(255))"
+
+        'DB7.Execute(sSQL)
+
+        'sSQL = "CREATE TABLE [TBL_HASH] ([id] counter, [file] varchar(255), [hash] varchar(255),[dttm] Date)"
+
+        'DB7.Execute(sSQL)
+
+
+
+    End Sub
 
     Public Sub LoadDatabase(Optional ByRef sFile As String = "")
         On Error GoTo ERR1
@@ -25,8 +49,20 @@ Module MOD_DATABASE
         BP = Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\"
 
         Base_Name = "db.mdb"
-
         sFile = Base_Name
+
+
+        If IO.File.Exists(BP & "\" & sFile) Then
+
+        Else
+
+            MsgBox("Не найден файл базы данных" & vbCrLf & "Обратитесь к производителю", MsgBoxStyle.Critical)
+            End
+            'Call CREATE_DATABASE()
+
+
+        End If
+
 
         'ConNect = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & BP & "\" & sFile & ";User Id=admin;Password=;"
         'DB8 = New OleDbConnection(ConNect)
@@ -104,7 +140,7 @@ Error_:
         RSExistsHash = False
     End Function
 
-    Public Function RsExistTXT(ByVal sGroupName As String, ByVal sHash As String) As Boolean
+    Public Function RsExistTXT(ByVal sGroupName As String, ByVal sHash As String, ByVal stmp As String) As Boolean
         RsExistTXT = False
         Dim d() As String
 
@@ -115,7 +151,7 @@ Error_:
         End If
 
         Try
-
+            Dim stxt As String
             Dim Txt() As String = IO.File.ReadAllLines(Application.StartupPath & "\change.log", System.Text.Encoding.Default)
 
             For x = 0 To Txt.Length - 1
@@ -126,10 +162,24 @@ Error_:
 
                 Else
 
-                    If d(2) = sGroupName And d(4) = sHash Then
+                    Select Case stmp
+
+                        Case "zfile"
+
+                            stxt = "Обнаружены изменения в файле: "
+
+                        Case "efile"
+
+                            stxt = "Не найден файл: "
+                    End Select
+
+
+                    If d(2) = sGroupName And d(1) = stxt And d(4) = sHash Then
 
                         RsExistTXT = True
                         Exit Function
+
+
                     End If
 
                 End If
@@ -180,5 +230,14 @@ Error_:
 
     End Sub
 
+    Public Sub ResList(ByVal resizingListView As ListView)
+
+        Dim columnIndex As Integer
+
+        For columnIndex = 1 To resizingListView.Columns.Count - 1
+            resizingListView.AutoResizeColumn(columnIndex, ColumnHeaderAutoResizeStyle.HeaderSize)
+        Next
+
+    End Sub
 
 End Module

@@ -78,7 +78,6 @@ Public Class MainForm
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
 
-
         LoadDatabase()
 
         RepAddBrToolStripMenuItem.Enabled = False
@@ -102,8 +101,6 @@ Public Class MainForm
 
 
         Call typeCRCLoad()
-
-
 
         Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
@@ -540,11 +537,12 @@ Public Class MainForm
 
 
                             lvFiles.Items(intcount).SubItems.Add("No")
+
                             lvFiles.Items(CInt(intcount)).ForeColor = Color.Cyan
                             lvFiles.Items(CInt(intcount)).BackColor = Color.Red
 
 
-                            If Not RsExistTXT(.Fields("file").Value, .Fields("hash").Value) Then
+                            If Not RsExistTXT(.Fields("file").Value, .Fields("hash").Value, "zfile") Then
                                 Dim d = Now
                                 IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Обнаружены изменения в файле: " & "|" & .Fields("file").Value & "|" & " Записанная контрольная сумма: " & "|" & .Fields("hash").Value & "|" & " не соответствует текущей: " & "|" & newHash & vbNewLine, System.Text.Encoding.Default)
 
@@ -576,13 +574,12 @@ Public Class MainForm
                         lvFiles.Items(CInt(intcount)).ForeColor = Color.Yellow
                         lvFiles.Items(CInt(intcount)).BackColor = Color.SlateGray
 
-                        If Not RsExistTXT(.Fields("file").Value, .Fields("hash").Value) Then
+                        If Not RsExistTXT(.Fields("file").Value, .Fields("hash").Value, "efile") Then
                             Dim d = Now
                             IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Не найден файл: " & "|" & .Fields("file").Value & "|" & " Записанная контрольная сумма: " & "|" & .Fields("hash").Value & vbNewLine, System.Text.Encoding.Default)
                             '############################################
 
                         End If
-
 
                         If Len(sMessage) <> 0 Then
 
@@ -602,6 +599,9 @@ Public Class MainForm
                         lvFiles.Items(CInt(intcount)).SubItems.Add("")
                     End If
 
+                    lvFiles.Items(CInt(intcount)).Selected = True
+                    lvFiles.Items(CInt(intcount)).EnsureVisible()
+
 
                     ' Dim f As New IO.FileInfo(.Fields("file").Value)
                     ' lvFiles.Items(CInt(intcount)).SubItems.Add(f.Length)
@@ -617,7 +617,6 @@ Public Class MainForm
             rs = Nothing
 
             intcount = intcount + 1
-
 
             'Если имеются измененные файлы
             Select Case intj
@@ -1388,5 +1387,9 @@ Public Class MainForm
 
         Me.Cursor = Cursors.Default
 
+    End Sub
+
+    Private Sub ПоискДубликатовToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ПоискДубликатовToolStripMenuItem.Click
+        frmDouble.ShowDialog(Me)
     End Sub
 End Class
