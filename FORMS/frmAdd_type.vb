@@ -294,8 +294,10 @@
                     DB7.Execute(sSQL)
                     txtType.Text = ""
                     btnAdd.Text = "Добавить"
-                Case Else
 
+                    MainForm.AddLogEntr("Изменен игнорируемый тип файла: " & txtType.Text, 2)
+
+                Case Else
 
                     If Not RSExistsType(txtType.Text) Then
 
@@ -303,6 +305,9 @@
                         DB7.Execute(sSQL)
                         txtType.Text = ""
                         btnAdd.Text = "Добавить"
+
+                        MainForm.AddLogEntr("Добавлен игнорируемый тип файла: " & txtType.Text, 2)
+
                     End If
 
             End Select

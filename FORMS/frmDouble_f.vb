@@ -35,6 +35,33 @@ Public Class frmDouble_f
         Dim strfilesize As Integer
         Dim ValueinMB As Double
 
+        Try
+
+            Dim sCOUNT As String
+            Dim rs As Recordset
+            rs = New Recordset
+            sSQL = "SELECT count(*) as t_n FROM TBL_HASH where hash='" & stmp & "'"
+            rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+            With rs
+                sCOUNT = .Fields("t_n").Value
+            End With
+            rs.Close()
+            rs = Nothing
+
+            Select Case sCOUNT
+
+                Case 1
+                    MsgBox("Дубликатов не обнаружено", MsgBoxStyle.Information)
+                    Me.Close()
+                Case Else
+
+
+            End Select
+
+        Catch ex As Exception
+
+        End Try
 
         sSQL = "SELECT * FROM TBL_HASH where hash='" & stmp & "'"
 

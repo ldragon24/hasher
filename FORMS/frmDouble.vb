@@ -77,7 +77,6 @@
             intj = z
         Next
 
-
         stmp_hash = lvFilesR.SelectedItems(intj).SubItems(1).Text
 
         frmDouble_f.ShowDialog()

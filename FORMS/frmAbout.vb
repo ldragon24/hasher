@@ -17,7 +17,7 @@
         Me.LabelCopyright.Text = My.Application.Info.Copyright
         Me.LabelCompanyName.Text = My.Application.Info.CompanyName
 
-        Me.TextBoxDescription.Text = "Программа для мониторинга контрольных сумм выбранных файлов"
+        Me.TextBoxDescription.Text = "Средство фиксации и контроля исходного состояния программного комплекса"
 
     End Sub
 

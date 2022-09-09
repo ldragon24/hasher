@@ -78,6 +78,9 @@ Public Class MainForm
 
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
 
+        AddLogEntr("Программа запущена", 2)
+
+
         LoadDatabase()
 
         RepAddBrToolStripMenuItem.Enabled = False
@@ -178,6 +181,9 @@ Public Class MainForm
             End With
 
             BasePath = BasePath & "\"
+
+            AddLogEntr("Добавлен новый каталог: " & BasePath, 2)
+
             Call find_file()
 
         Catch ex As Exception
@@ -546,6 +552,10 @@ Public Class MainForm
                                 Dim d = Now
                                 IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Обнаружены изменения в файле: " & "|" & .Fields("file").Value & "|" & " Записанная контрольная сумма: " & "|" & .Fields("hash").Value & "|" & " не соответствует текущей: " & "|" & newHash & vbNewLine, System.Text.Encoding.Default)
 
+                                ' My.Application.Log.WriteEntry("Обнаружены изменения в файле: " & .Fields("file").Value & " Записанная контрольная сумма: " & .Fields("hash").Value & " не соответствует текущей: " & newHash, TraceEventType.Warning)
+
+                                AddLogEntr("Обнаружены изменения в файле: " & .Fields("file").Value & vbCrLf & " Записанная контрольная сумма: " & .Fields("hash").Value & " не соответствует текущей: " & newHash, 1)
+
                             End If
 
                             If Len(sMessage) <> 0 Then
@@ -578,6 +588,10 @@ Public Class MainForm
                             Dim d = Now
                             IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Не найден файл: " & "|" & .Fields("file").Value & "|" & " Записанная контрольная сумма: " & "|" & .Fields("hash").Value & vbNewLine, System.Text.Encoding.Default)
                             '############################################
+
+                            'My.Application.Log.WriteEntry("Не найден файл: " & .Fields("file").Value & " Записанная контрольная сумма: " & .Fields("hash").Value, TraceEventType.Warning)
+
+                            AddLogEntr("Не найден файл: " & .Fields("file").Value & vbCrLf & " Записанная контрольная сумма: " & .Fields("hash").Value, 0)
 
                         End If
 
@@ -742,19 +756,24 @@ Public Class MainForm
 
         Dim z As Integer
 
+        Dim intj As Integer
+
         For z = 0 To lvFiles.SelectedItems.Count - 1
             rCOUNT = (lvFiles.SelectedItems(z).Text)
+            intj = z
         Next
+
 
         If MsgBox("Выбранные данные будут удалены" & vbCrLf & "Данные будут потеряны" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
             If MassDel = False Then
 
+                AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 0)
                 DELETE_FILE(rCOUNT)
 
             Else
 
-                Dim intj As Integer = 0
+                intj = 0
                 Dim intj1 As Integer = 0
 
                 lvFiles.Select()
@@ -784,7 +803,7 @@ Public Class MainForm
                         If lvFiles.Items(intj).Checked = True Then
 
                             Call DELETE_FILE(lvFiles.SelectedItems(intj).Text)
-
+                            AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 0)
                         End If
 
                     Next
@@ -886,9 +905,10 @@ Public Class MainForm
 
                 'sSQL = "UPDATE [TBL_HASH] SET [hash]=@item1,[dttm]=@item2 WHERE id=@id"
 
-
                 sSQL = "UPDATE TBL_HASH SET hash='" & newHash & "', dttm='" & DateAndTime.Now.ToString & "' WHERE id =" & rCOUNT
                 DB7.Execute(sSQL)
+
+                AddLogEntr("Записана новая контрольная сумма для файла: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Контрольная сумма: " & newHash & vbCrLf & "Старая контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
 
                 'With cmdInsert
 
@@ -929,9 +949,9 @@ Public Class MainForm
 
         If MsgBox("Работа программы будет завершена" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
+            ThrTIMER_.Abort()
             UnLoadDatabase()
             ni.Visible = False
-
             End
 
         End If
@@ -962,6 +982,8 @@ Public Class MainForm
             'cmd = New OleDbCommand(sSQL, DB8)
             'dr = cmd.ExecuteReader
             'dr = Nothing
+
+            AddLogEntr("База данных очищена", 0)
 
             DB7.Execute(sSQL)
 
@@ -1025,9 +1047,12 @@ Public Class MainForm
 
         If MsgBox("Работа программы будет завершена" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
+            ThrTIMER_.Abort()
+            Call COMPARE_DB()
             UnLoadDatabase()
-
             ni.Visible = False
+            AddLogEntr("Работа программы завершена", 2)
+
             End
 
         End If
@@ -1084,6 +1109,8 @@ Public Class MainForm
             Exit Sub
         End If
 
+        AddLogEntr("Данные сохранены в файл: " & saveFileDialog1.FileName, 2)
+
         MessageBox.Show("Файл сохранен!")
 
     End Sub
@@ -1118,9 +1145,14 @@ Public Class MainForm
 
         If MsgBox("Работа программы будет завершена" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
+            Call COMPARE_DB()
+
             UnLoadDatabase()
 
             ni.Visible = False
+
+            AddLogEntr("Работа программы завершена", 2)
+
             End
 
         End If
@@ -1257,12 +1289,9 @@ Public Class MainForm
 
     Private Sub stat2_Click(sender As Object, e As EventArgs) Handles stat2.Click
 
-
         Select Case stat2.Text
 
-
             Case "Изменений в файлах не зафиксировано"
-
 
             Case Else
 
@@ -1329,6 +1358,12 @@ Public Class MainForm
     End Sub
 
     Private Sub addFile_Click(sender As Object, e As EventArgs) Handles addFile.Click
+
+        Call FilesAdd()
+
+    End Sub
+
+    Private Sub FilesAdd()
         Dim fdlg As OpenFileDialog = New OpenFileDialog()
 
         fdlg.Title = "Выбор файла"
@@ -1376,20 +1411,84 @@ Public Class MainForm
 
             If Not RSExistsHash(fdlg.FileName) Then
                 ADD_DB_HASH(fdlg.FileName, thisHash, DateAndTime.Now)
+
+                AddLogEntr("Добавлен новый файл: " & fdlg.FileName & vbCrLf & "Расчитанная контрольная сумма: " & thisHash, 2)
+
             End If
 
             Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
         Else
 
-
         End If
 
         Me.Cursor = Cursors.Default
-
     End Sub
 
     Private Sub ПоискДубликатовToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ПоискДубликатовToolStripMenuItem.Click
         frmDouble.ShowDialog(Me)
     End Sub
+
+    Private Sub ДобавитьФайлToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ДобавитьФайлToolStripMenuItem.Click
+
+        Call FilesAdd()
+
+    End Sub
+
+    Private Sub ПоискДубликатаToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ПоискДубликатаToolStripMenuItem.Click
+
+        Dim rCOUNT As Integer
+        Dim intj As Integer
+
+        For z = 0 To lvFilesR.SelectedItems.Count - 1
+            rCOUNT = (lvFilesR.SelectedItems(z).Text)
+            intj = z
+        Next
+
+        frmDouble.stmp_hash = lvFiles.SelectedItems(intj).SubItems(2).Text
+
+        frmDouble_f.ShowDialog()
+
+        frmDouble_f.Focus()
+    End Sub
+
+    Public Sub AddLogEntr(ByVal stxt As String, ByVal stmp As Integer)
+
+        Dim myLog As New EventLog
+        '
+        ' Create a new log.
+        '
+        If Not EventLog.SourceExists("Application") Then
+            EventLog.CreateEventSource(Application.ProductName, "Application")
+        End If
+
+        AddHandler myLog.EntryWritten, AddressOf OnEntryWritten
+
+        With myLog
+            .Source = Application.ProductName
+            .Log = "Application"
+            .EnableRaisingEvents = True
+
+            Select Case stmp
+
+                Case 1
+                    .WriteEntry(stxt, EventLogEntryType.Warning)
+                Case 0
+                    .WriteEntry(stxt, EventLogEntryType.Error)
+                Case 2
+                    .WriteEntry(stxt, EventLogEntryType.Information)
+
+            End Select
+
+        End With
+
+        myLog.Close()
+
+
+    End Sub
+
+    Public Sub OnEntryWritten(ByVal source As Object, ByVal e As EntryWrittenEventArgs)
+        Console.WriteLine(("Written: " + e.Entry.Message))
+    End Sub
+
 End Class

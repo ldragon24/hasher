@@ -36,8 +36,10 @@ Partial Class MainForm
         Me.ilsCommands = New System.Windows.Forms.ImageList(Me.components)
         Me.cmBmenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.addFoldertoBranch = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ДобавитьФайлToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.RepAddBrToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.UpdateData = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ПоискДубликатаToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuDeltoBranch = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.AllDeleteDB = New System.Windows.Forms.ToolStripMenuItem()
@@ -157,16 +159,23 @@ Partial Class MainForm
         '
         'cmBmenu
         '
-        Me.cmBmenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFoldertoBranch, Me.RepAddBrToolStripMenuItem, Me.UpdateData, Me.mnuDeltoBranch, Me.ToolStripMenuItem1, Me.AllDeleteDB, Me.M_exit})
+        Me.cmBmenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFoldertoBranch, Me.ДобавитьФайлToolStripMenuItem, Me.RepAddBrToolStripMenuItem, Me.UpdateData, Me.ПоискДубликатаToolStripMenuItem, Me.mnuDeltoBranch, Me.ToolStripMenuItem1, Me.AllDeleteDB, Me.M_exit})
         Me.cmBmenu.Name = "cmMENU"
-        Me.cmBmenu.Size = New System.Drawing.Size(207, 158)
+        Me.cmBmenu.Size = New System.Drawing.Size(207, 202)
         '
         'addFoldertoBranch
         '
-        Me.addFoldertoBranch.Image = Global.HASHER.My.Resources.Resources.add
+        Me.addFoldertoBranch.Image = Global.HASHER.My.Resources.Resources.fadd
         Me.addFoldertoBranch.Name = "addFoldertoBranch"
         Me.addFoldertoBranch.Size = New System.Drawing.Size(206, 22)
         Me.addFoldertoBranch.Text = "Добавить папку"
+        '
+        'ДобавитьФайлToolStripMenuItem
+        '
+        Me.ДобавитьФайлToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.add
+        Me.ДобавитьФайлToolStripMenuItem.Name = "ДобавитьФайлToolStripMenuItem"
+        Me.ДобавитьФайлToolStripMenuItem.Size = New System.Drawing.Size(206, 22)
+        Me.ДобавитьФайлToolStripMenuItem.Text = "Добавить файл"
         '
         'RepAddBrToolStripMenuItem
         '
@@ -181,6 +190,13 @@ Partial Class MainForm
         Me.UpdateData.Name = "UpdateData"
         Me.UpdateData.Size = New System.Drawing.Size(206, 22)
         Me.UpdateData.Text = "Обновить данные"
+        '
+        'ПоискДубликатаToolStripMenuItem
+        '
+        Me.ПоискДубликатаToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.update
+        Me.ПоискДубликатаToolStripMenuItem.Name = "ПоискДубликатаToolStripMenuItem"
+        Me.ПоискДубликатаToolStripMenuItem.Size = New System.Drawing.Size(206, 22)
+        Me.ПоискДубликатаToolStripMenuItem.Text = "Поиск дубликата"
         '
         'mnuDeltoBranch
         '
@@ -462,4 +478,6 @@ Partial Class MainForm
     Friend WithEvents lvFilesR As System.Windows.Forms.ListView
     Friend WithEvents addFile As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ПоискДубликатовToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ДобавитьФайлToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ПоискДубликатаToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
 End Class

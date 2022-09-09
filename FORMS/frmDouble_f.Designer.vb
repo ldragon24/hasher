@@ -33,7 +33,7 @@ Partial Class frmDouble_f
         Me.lvFilesR.Location = New System.Drawing.Point(0, 0)
         Me.lvFilesR.MultiSelect = False
         Me.lvFilesR.Name = "lvFilesR"
-        Me.lvFilesR.Size = New System.Drawing.Size(844, 401)
+        Me.lvFilesR.Size = New System.Drawing.Size(844, 406)
         Me.lvFilesR.TabIndex = 5
         Me.lvFilesR.UseCompatibleStateImageBehavior = False
         Me.lvFilesR.View = System.Windows.Forms.View.Details
@@ -42,7 +42,7 @@ Partial Class frmDouble_f
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(844, 401)
+        Me.ClientSize = New System.Drawing.Size(844, 406)
         Me.Controls.Add(Me.lvFilesR)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow
         Me.Name = "frmDouble_f"
