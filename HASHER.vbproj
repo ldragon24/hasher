@@ -48,7 +48,7 @@
     <DebugType>Full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DocumentationFile>HASHER.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
@@ -155,6 +155,7 @@
     </Compile>
     <Compile Include="MODUL\gost.vb" />
     <Compile Include="MODUL\hesher.vb" />
+    <Compile Include="MODUL\listtohtml.vb" />
     <Compile Include="MODUL\ListViewComparer.vb" />
     <Compile Include="MODUL\MOD_DATABASE.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

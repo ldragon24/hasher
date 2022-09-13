@@ -1,6 +1,5 @@
 ﻿Imports System.IO
 Imports System.Threading
-'Imports Microsoft.Office.Interop
 
 Public Class MainForm
 
@@ -141,12 +140,16 @@ Public Class MainForm
             Case 0
                 stlabel.Text = "Записей в базе не найдено"
                 UpdateList.Enabled = False
+                SaveList.Enabled = False
                 ClearDB.Enabled = False
+                findDouble.Enabled = False
             Case Else
 
                 stlabel.Text = "Записей в базе: " & sCOUNT
                 UpdateList.Enabled = True
                 ClearDB.Enabled = True
+                SaveList.Enabled = True
+                findDouble.Enabled = True
                 Call find_file_re()
 
         End Select
@@ -589,9 +592,7 @@ Public Class MainForm
                             IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Не найден файл: " & "|" & .Fields("file").Value & "|" & " Записанная контрольная сумма: " & "|" & .Fields("hash").Value & vbNewLine, System.Text.Encoding.Default)
                             '############################################
 
-                            'My.Application.Log.WriteEntry("Не найден файл: " & .Fields("file").Value & " Записанная контрольная сумма: " & .Fields("hash").Value, TraceEventType.Warning)
-
-                            AddLogEntr("Не найден файл: " & .Fields("file").Value & vbCrLf & " Записанная контрольная сумма: " & .Fields("hash").Value, 0)
+                            AddLogEntr("Не найден файл: " & .Fields("file").Value & vbCrLf & " Записанная контрольная сумма: " & .Fields("hash").Value, 1)
 
                         End If
 
@@ -615,7 +616,6 @@ Public Class MainForm
 
                     lvFiles.Items(CInt(intcount)).Selected = True
                     lvFiles.Items(CInt(intcount)).EnsureVisible()
-
 
                     ' Dim f As New IO.FileInfo(.Fields("file").Value)
                     ' lvFiles.Items(CInt(intcount)).SubItems.Add(f.Length)
@@ -659,8 +659,6 @@ Public Class MainForm
 
             End Select
 
-
-
         Catch ex As Exception
             MsgBox(ex.Message)
             ResList(lvFiles)
@@ -673,7 +671,6 @@ Public Class MainForm
                 ni.ShowBalloonTip(TIME_TOOL_TIPS * 1000, "Проверка контрольной суммы", sMessage, ToolTipIcon.Warning)
 
             Case Else
-
 
         End Select
 
@@ -706,13 +703,15 @@ Public Class MainForm
                 intj = z
             Next
 
-            If lvFiles.SelectedItems(intj).SubItems(3).Text = "Ok" Then
+            Select Case lvFiles.SelectedItems(intj).SubItems(3).Text
 
-                RepAddBrToolStripMenuItem.Enabled = False
+                Case "No"
+                    RepAddBrToolStripMenuItem.Enabled = True
+                Case Else
 
-            Else
-                RepAddBrToolStripMenuItem.Enabled = True
-            End If
+                    RepAddBrToolStripMenuItem.Enabled = False
+
+            End Select
 
         Catch ex As Exception
 
@@ -751,7 +750,6 @@ Public Class MainForm
 
     Private Sub mnuDeltoBranch_Click(sender As Object, e As EventArgs) Handles mnuDeltoBranch.Click
 
-
         If lvFiles.Items.Count = 0 Then Exit Sub
 
         Dim z As Integer
@@ -763,12 +761,11 @@ Public Class MainForm
             intj = z
         Next
 
-
         If MsgBox("Выбранные данные будут удалены" & vbCrLf & "Данные будут потеряны" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
             If MassDel = False Then
 
-                AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 0)
+                AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
                 DELETE_FILE(rCOUNT)
 
             Else
@@ -803,7 +800,7 @@ Public Class MainForm
                         If lvFiles.Items(intj).Checked = True Then
 
                             Call DELETE_FILE(lvFiles.SelectedItems(intj).Text)
-                            AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 0)
+                            AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
                         End If
 
                     Next
@@ -983,7 +980,7 @@ Public Class MainForm
             'dr = cmd.ExecuteReader
             'dr = Nothing
 
-            AddLogEntr("База данных очищена", 0)
+            AddLogEntr("База данных очищена", 1)
 
             DB7.Execute(sSQL)
 
@@ -1094,21 +1091,73 @@ Public Class MainForm
     'End Sub
 
     Private Sub СохранитьСписокВФайлToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveList.Click
+
+        If lvFiles.Items.Count = 0 Then
+
+            MsgBox("Нечего сохранять, данных нет", MsgBoxStyle.Exclamation, Application.ProductName)
+            Exit Sub
+
+        End If
+
+        Me.Cursor = Cursors.WaitCursor
+
         Dim saveFileDialog1 As New SaveFileDialog
         ' saveFileDialog1.Filter = "Excel File|*.xlsx"
         ' saveFileDialog1.Title = "Сохранить в формате Excel"
 
-        saveFileDialog1.Filter = "CSV File|*.csv"
-        saveFileDialog1.Title = "Сохранить в формате CSV"
+        ' saveFileDialog1.Filter = "CSV File|*.csv"
+
+        saveFileDialog1.Filter = "CSV File|*.csv|HTML files (.html)|*.html|Text Files (.txt)|*.txt"
+        saveFileDialog1.DefaultExt = "csv"
+        saveFileDialog1.ValidateNames = True
+
+        saveFileDialog1.Title = "Сохранить в файл"
 
         saveFileDialog1.ShowDialog()
         If saveFileDialog1.FileName <> "" Then
             'saveExcelFile(saveFileDialog1.FileName)
-            WriteListViewToCSVFile(saveFileDialog1.FileName)
+
+            Select Case saveFileDialog1.FilterIndex
+
+                Case 1
+                    WriteListViewToCSVFile(saveFileDialog1.FileName)
+                Case 2
+
+                    wbrTable.DocumentText = ListViewToHtmlTable(lvFiles, 1, 1, 2)
+
+                    Do Until wbrTable.ReadyState = WebBrowserReadyState.Complete
+                        Application.DoEvents()
+                        System.Threading.Thread.Sleep(100)
+                    Loop
+
+                    My.Computer.FileSystem.WriteAllText(saveFileDialog1.FileName, wbrTable.DocumentText, False)
+
+                    wbrTable.Navigate("about:blank")
+                    Do Until wbrTable.ReadyState = WebBrowserReadyState.Complete
+                        Application.DoEvents()
+                        System.Threading.Thread.Sleep(100)
+                    Loop
+
+                Case 3
+                    Dim Write As New IO.StreamWriter(saveFileDialog1.FileName)
+                    Dim k As ListView.ColumnHeaderCollection = lvFiles.Columns
+                    For Each x As ListViewItem In lvFiles.Items
+                        Dim StrLn As String = ""
+                        For i = 0 To x.SubItems.Count - 1
+                            StrLn += k(i).Text + " :" + x.SubItems(i).Text + Space(3)
+                        Next
+                        Write.WriteLine(StrLn)
+                    Next
+                    Write.Close()
+
+            End Select
+
         Else
+            Me.Cursor = Cursors.Default
             Exit Sub
         End If
 
+        Me.Cursor = Cursors.Default
         AddLogEntr("Данные сохранены в файл: " & saveFileDialog1.FileName, 2)
 
         MessageBox.Show("Файл сохранен!")
@@ -1376,8 +1425,6 @@ Public Class MainForm
         If fdlg.ShowDialog() = DialogResult.OK Then
             Me.Cursor = Cursors.WaitCursor
 
-            ' EverestFilePatch = fdlg.FileName
-
             Dim thisHash As String
 
             Select Case typeCRC
@@ -1425,7 +1472,7 @@ Public Class MainForm
         Me.Cursor = Cursors.Default
     End Sub
 
-    Private Sub ПоискДубликатовToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ПоискДубликатовToolStripMenuItem.Click
+    Private Sub findDouble_Click(sender As Object, e As EventArgs) Handles findDouble.Click
         frmDouble.ShowDialog(Me)
     End Sub
 
@@ -1450,24 +1497,24 @@ Public Class MainForm
         frmDouble_f.ShowDialog()
 
         frmDouble_f.Focus()
+
     End Sub
 
     Public Sub AddLogEntr(ByVal stxt As String, ByVal stmp As Integer)
 
         Dim myLog As New EventLog
-        '
-        ' Create a new log.
-        '
+
         If Not EventLog.SourceExists("Application") Then
             EventLog.CreateEventSource(Application.ProductName, "Application")
         End If
 
-        AddHandler myLog.EntryWritten, AddressOf OnEntryWritten
+        ' AddHandler myLog.EntryWritten, AddressOf OnEntryWritten
 
         With myLog
             .Source = Application.ProductName
             .Log = "Application"
             .EnableRaisingEvents = True
+
 
             Select Case stmp
 
@@ -1484,11 +1531,10 @@ Public Class MainForm
 
         myLog.Close()
 
-
     End Sub
 
-    Public Sub OnEntryWritten(ByVal source As Object, ByVal e As EntryWrittenEventArgs)
-        Console.WriteLine(("Written: " + e.Entry.Message))
-    End Sub
+    'Public Sub OnEntryWritten(ByVal source As Object, ByVal e As EntryWrittenEventArgs)
+    '    Console.WriteLine(("Written: " + e.Entry.Message))
+    'End Sub
 
 End Class

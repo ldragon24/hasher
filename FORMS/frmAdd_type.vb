@@ -2,6 +2,7 @@
     Private MassDel As Boolean = False
     Private rCOUNT As Integer = 0
     Private sSID As Integer
+    Private sTXTtmp As String
 
     Private Sub frmAdd_type_Load(sender As Object, e As EventArgs) Handles Me.Load
 
@@ -230,6 +231,8 @@
 
                 If Not IsDBNull(.Fields("type").Value) Then txtType.Text = .Fields("type").Value
 
+                sTXTtmp = .Fields("type").Value
+
             End With
 
             btnAdd.Text = "Сохранить"
@@ -292,10 +295,11 @@
 
                     sSQL = "UPDATE TBL_IGNORE SET type='" & txtType.Text & "' WHERE id =" & rCOUNT
                     DB7.Execute(sSQL)
+
+                    MainForm.AddLogEntr("Изменен игнорируемый тип файла c : " & sTXTtmp & " на " & txtType.Text, 2)
+                    sTXTtmp = ""
                     txtType.Text = ""
                     btnAdd.Text = "Добавить"
-
-                    MainForm.AddLogEntr("Изменен игнорируемый тип файла: " & txtType.Text, 2)
 
                 Case Else
 
@@ -303,11 +307,11 @@
 
                         sSQL = "INSERT INTO [TBL_IGNORE]([type]) VALUES('" & txtType.Text & "')"
                         DB7.Execute(sSQL)
-                        txtType.Text = ""
-                        btnAdd.Text = "Добавить"
 
                         MainForm.AddLogEntr("Добавлен игнорируемый тип файла: " & txtType.Text, 2)
 
+                        txtType.Text = ""
+                        btnAdd.Text = "Добавить"
                     End If
 
             End Select

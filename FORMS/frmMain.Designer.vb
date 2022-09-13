@@ -51,7 +51,7 @@ Partial Class MainForm
         Me.UpdateList = New System.Windows.Forms.ToolStripMenuItem()
         Me.IgnoreFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.SaveList = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ПоискДубликатовToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.findDouble = New System.Windows.Forms.ToolStripMenuItem()
         Me.ClearDB = New System.Windows.Forms.ToolStripMenuItem()
         Me.SetupPrg = New System.Windows.Forms.ToolStripMenuItem()
         Me.Exitmnu = New System.Windows.Forms.ToolStripMenuItem()
@@ -59,6 +59,7 @@ Partial Class MainForm
         Me.TableLayoutPanel2 = New System.Windows.Forms.TableLayoutPanel()
         Me.lvFilesF = New System.Windows.Forms.ListView()
         Me.lvFilesR = New System.Windows.Forms.ListView()
+        Me.wbrTable = New System.Windows.Forms.WebBrowser()
         Me.ni = New System.Windows.Forms.NotifyIcon(Me.components)
         Me.cmenuNI = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.РазвернутьToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -238,7 +239,7 @@ Partial Class MainForm
         '
         'МенюToolStripMenuItem
         '
-        Me.МенюToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFolder, Me.addFile, Me.UpdateList, Me.IgnoreFile, Me.SaveList, Me.ПоискДубликатовToolStripMenuItem, Me.ClearDB, Me.SetupPrg, Me.Exitmnu})
+        Me.МенюToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFolder, Me.addFile, Me.UpdateList, Me.IgnoreFile, Me.SaveList, Me.findDouble, Me.ClearDB, Me.SetupPrg, Me.Exitmnu})
         Me.МенюToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.service
         Me.МенюToolStripMenuItem.Name = "МенюToolStripMenuItem"
         Me.МенюToolStripMenuItem.Size = New System.Drawing.Size(69, 20)
@@ -284,12 +285,12 @@ Partial Class MainForm
         Me.SaveList.Size = New System.Drawing.Size(272, 22)
         Me.SaveList.Text = "Сохранить список в файл"
         '
-        'ПоискДубликатовToolStripMenuItem
+        'findDouble
         '
-        Me.ПоискДубликатовToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.update
-        Me.ПоискДубликатовToolStripMenuItem.Name = "ПоискДубликатовToolStripMenuItem"
-        Me.ПоискДубликатовToolStripMenuItem.Size = New System.Drawing.Size(272, 22)
-        Me.ПоискДубликатовToolStripMenuItem.Text = "Поиск дубликатов"
+        Me.findDouble.Image = Global.HASHER.My.Resources.Resources.update
+        Me.findDouble.Name = "findDouble"
+        Me.findDouble.Size = New System.Drawing.Size(272, 22)
+        Me.findDouble.Text = "Поиск дубликатов"
         '
         'ClearDB
         '
@@ -333,6 +334,7 @@ Partial Class MainForm
         Me.TableLayoutPanel2.Controls.Add(Me.lvFiles, 0, 1)
         Me.TableLayoutPanel2.Controls.Add(Me.lvFilesF, 2, 2)
         Me.TableLayoutPanel2.Controls.Add(Me.lvFilesR, 2, 0)
+        Me.TableLayoutPanel2.Controls.Add(Me.wbrTable, 2, 1)
         Me.TableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TableLayoutPanel2.Location = New System.Drawing.Point(0, 24)
         Me.TableLayoutPanel2.Name = "TableLayoutPanel2"
@@ -368,6 +370,15 @@ Partial Class MainForm
         Me.lvFilesR.UseCompatibleStateImageBehavior = False
         Me.lvFilesR.View = System.Windows.Forms.View.Details
         Me.lvFilesR.Visible = False
+        '
+        'wbrTable
+        '
+        Me.wbrTable.Location = New System.Drawing.Point(1175, 32)
+        Me.wbrTable.MinimumSize = New System.Drawing.Size(20, 20)
+        Me.wbrTable.Name = "wbrTable"
+        Me.wbrTable.Size = New System.Drawing.Size(24, 508)
+        Me.wbrTable.TabIndex = 5
+        Me.wbrTable.Visible = False
         '
         'ni
         '
@@ -477,7 +488,8 @@ Partial Class MainForm
     Friend WithEvents lvFilesF As System.Windows.Forms.ListView
     Friend WithEvents lvFilesR As System.Windows.Forms.ListView
     Friend WithEvents addFile As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ПоискДубликатовToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents findDouble As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ДобавитьФайлToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ПоискДубликатаToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents wbrTable As System.Windows.Forms.WebBrowser
 End Class
