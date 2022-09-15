@@ -123,17 +123,17 @@ Module hasher
     End Function
 
     Public Function GetGOST(ByVal sFileName As Byte()) As String
-        Dim G As GOST = New GOST(256)
-        Dim G512 As GOST = New GOST(512)
-        Dim message As Byte() = {&H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30}
+        'Dim G As GOST = New GOST(256)
+        'Dim G512 As GOST = New GOST(512)
+        'Dim message As Byte() = {&H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30}
 
 
-        Dim res As Byte() = G.GetHashGost(sFileName)
-        Dim res2 As Byte() = G512.GetHashGost(sFileName)
-        Dim h256 = BitConverter.ToString(res)
-        Dim h512 = BitConverter.ToString(res2)
+        'Dim res As Byte() = G.GetHashGost(sFileName)
+        'Dim res2 As Byte() = G512.GetHashGost(sFileName)
+        'Dim h256 = BitConverter.ToString(res)
+        'Dim h512 = BitConverter.ToString(res2)
 
-        Return h512
+        'Return h512
 
     End Function
 

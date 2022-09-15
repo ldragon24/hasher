@@ -67,6 +67,7 @@ Partial Class MainForm
         Me.НастройкиToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripSeparator()
         Me.ВыходToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.pb1 = New System.Windows.Forms.ToolStripProgressBar()
         Me.StatusStrip1.SuspendLayout()
         Me.cmBmenu.SuspendLayout()
         Me.MenuStrip1.SuspendLayout()
@@ -109,7 +110,7 @@ Partial Class MainForm
         '
         'StatusStrip1
         '
-        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.stlabel, Me.ToolStripStatusLabel1, Me.stat2, Me.ToolStripStatusLabel2, Me.notfind})
+        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.stlabel, Me.ToolStripStatusLabel1, Me.stat2, Me.ToolStripStatusLabel2, Me.notfind, Me.pb1})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 587)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Size = New System.Drawing.Size(1202, 22)
@@ -423,6 +424,11 @@ Partial Class MainForm
         Me.ВыходToolStripMenuItem1.Size = New System.Drawing.Size(135, 22)
         Me.ВыходToolStripMenuItem1.Text = "Выход"
         '
+        'pb1
+        '
+        Me.pb1.Name = "pb1"
+        Me.pb1.Size = New System.Drawing.Size(100, 16)
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -492,4 +498,5 @@ Partial Class MainForm
     Friend WithEvents ДобавитьФайлToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ПоискДубликатаToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents wbrTable As System.Windows.Forms.WebBrowser
+    Friend WithEvents pb1 As System.Windows.Forms.ToolStripProgressBar
 End Class

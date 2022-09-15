@@ -15,9 +15,7 @@ Public NotInheritable Class frmAbout
         ' TODO: настроить сведения о сборке приложения в области "Приложение" диалогового окна 
         '    свойств проекта (в меню "Проект").
 
-
         Me.LabelProductName.Text = My.Application.Info.ProductName
-
 
         Me.LabelCopyright.Text = My.Application.Info.Copyright
         Me.LabelCompanyName.Text = "Арзамасское ЛПУМГ"

@@ -25,44 +25,50 @@ Public Class MainForm
     End Property
 
     Private Sub typeCRCLoad()
-        Dim sSQL As String
 
-        Dim sCOUNT As Integer
+        Try
 
-        sSQL = "SELECT count(*) as t_n FROM TBL_CONF"
-        Dim rs As Recordset
-        rs = New Recordset
-        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+            Dim sSQL As String
 
-        With rs
-            sCOUNT = .Fields("t_n").Value
-        End With
-        rs.Close()
-        rs = Nothing
+            Dim sCOUNT As Integer
 
-        Select Case sCOUNT
+            sSQL = "SELECT count(*) as t_n FROM TBL_CONF"
+            Dim rs As Recordset
+            rs = New Recordset
+            rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
 
-            Case 1
+            With rs
+                sCOUNT = .Fields("t_n").Value
+            End With
+            rs.Close()
+            rs = Nothing
 
-                sSQL = "SELECT * FROM TBL_CONF"
-                rs = New Recordset
-                rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
-                With rs
-                    typeCRC = .Fields("type").Value
-                End With
-                rs.Close()
-                rs = Nothing
+            Select Case sCOUNT
 
-            Case Else
+                Case 1
 
-                sSQL = "DELETE * FROM TBL_CONF"
-                DB7.Execute(sSQL)
+                    sSQL = "SELECT * FROM TBL_CONF"
+                    rs = New Recordset
+                    rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+                    With rs
+                        typeCRC = .Fields("type").Value
+                    End With
+                    rs.Close()
+                    rs = Nothing
 
-                sSQL = "INSERT INTO FROM TBL_CONF (type) VALUES ('MD5')"
-                DB7.Execute(sSQL)
+                Case Else
 
-                Call typeCRCLoad()
-        End Select
+                    sSQL = "DELETE * FROM TBL_CONF"
+                    DB7.Execute(sSQL)
+
+                    sSQL = "INSERT INTO FROM TBL_CONF (type) VALUES ('MD5')"
+                    DB7.Execute(sSQL)
+
+                    Call typeCRCLoad()
+            End Select
+        Catch ex As Exception
+
+        End Try
 
     End Sub
 
@@ -78,7 +84,6 @@ Public Class MainForm
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles Me.Load
 
         AddLogEntr("Программа запущена", 2)
-
 
         LoadDatabase()
 
@@ -102,62 +107,71 @@ Public Class MainForm
         lvFilesF.Columns.Add(("Контрольная сумма"), 100, HorizontalAlignment.Left)
 
 
-        Call typeCRCLoad()
-
         Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+
+        ' Application.DoEvents()
+
+        Call typeCRCLoad()
 
 
         ThrTIMER_ = New System.Threading.Thread(AddressOf ThrTIMER)
         ThrTIMER_.Start()
 
-
-
-
     End Sub
 
     Public Sub LoadData()
 
-
         Me.Cursor = Cursors.WaitCursor
 
-        Dim sCOUNT As Integer
-        Dim sSQL As String
+        Try
 
-        sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
+            Dim sCOUNT As Integer
+            Dim sSQL As String
 
-        Dim rs As Recordset
-        rs = New Recordset
-        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+            sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
 
-        With rs
-            sCOUNT = .Fields("t_n").Value
-        End With
-        rs.Close()
-        rs = Nothing
+            Dim rs As Recordset
+            rs = New Recordset
+            rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
 
-        Select Case sCOUNT
+            With rs
+                sCOUNT = .Fields("t_n").Value
+            End With
+            rs.Close()
+            rs = Nothing
 
-            Case 0
-                stlabel.Text = "Записей в базе не найдено"
-                UpdateList.Enabled = False
-                SaveList.Enabled = False
-                ClearDB.Enabled = False
-                findDouble.Enabled = False
-            Case Else
+            Select Case sCOUNT
 
-                stlabel.Text = "Записей в базе: " & sCOUNT
-                UpdateList.Enabled = True
-                ClearDB.Enabled = True
-                SaveList.Enabled = True
-                findDouble.Enabled = True
-                Call find_file_re()
+                Case 0
+                    stlabel.Text = "Записей в базе не найдено"
+                    UpdateList.Enabled = False
+                    SaveList.Enabled = False
+                    ClearDB.Enabled = False
+                    findDouble.Enabled = False
+                    pb1.Visible = False
 
-        End Select
+                Case Else
+
+                    stlabel.Text = "Записей в базе: " & sCOUNT
+                    UpdateList.Enabled = True
+                    ClearDB.Enabled = True
+                    SaveList.Enabled = True
+                    findDouble.Enabled = True
+                    pb1.Visible = True
+                    pb1.Maximum = sCOUNT + 1
+                    pb1.Minimum = 0
+                    Call find_file_re()
+
+            End Select
+
+        Catch ex As Exception
+
+        End Try
 
         ResList(lvFiles)
 
-
         Me.Cursor = Cursors.Default
+
     End Sub
 
     Private Sub ADD_DIR()
@@ -239,11 +253,9 @@ Public Class MainForm
 
         End Try
 
-
         ' sSQL = "INSERT INTO [TBL_HASH]([file],[hash],[dttm]) VALUES(@item1,@item2,@item3)"
 
         sSQL = "INSERT INTO [TBL_HASH]([file],[hash],[dttm]) VALUES('" & A1 & "','" & A2 & "','" & A3 & "')"
-
 
         Try
 
@@ -293,7 +305,6 @@ Public Class MainForm
         intcount = 0
 
         On Error Resume Next
-
 
         Dim dirs() As String = Directory.GetFiles(BasePath, "*.*", SearchOption.AllDirectories)
 
@@ -614,15 +625,15 @@ Public Class MainForm
                         lvFiles.Items(CInt(intcount)).SubItems.Add("")
                     End If
 
-                    lvFiles.Items(CInt(intcount)).Selected = True
-                    lvFiles.Items(CInt(intcount)).EnsureVisible()
+                    'lvFiles.Items(CInt(intcount)).Selected = True
+                    'lvFiles.Items(CInt(intcount)).EnsureVisible()
 
                     ' Dim f As New IO.FileInfo(.Fields("file").Value)
                     ' lvFiles.Items(CInt(intcount)).SubItems.Add(f.Length)
 
                     intcount = intcount + 1
-
-                    Application.DoEvents()
+                    pb1.Value = intcount
+                    'Application.DoEvents()
 
                     .MoveNext()
                 Loop
@@ -630,7 +641,10 @@ Public Class MainForm
             rs.Close()
             rs = Nothing
 
+
             intcount = intcount + 1
+            pb1.Value = intcount
+            ' Application.DoEvents()
 
             'Если имеются измененные файлы
             Select Case intj
@@ -673,6 +687,8 @@ Public Class MainForm
             Case Else
 
         End Select
+
+        pb1.Visible = False
 
         Me.Cursor = Cursors.Default
         ResList(lvFiles)
@@ -752,43 +768,27 @@ Public Class MainForm
 
         If lvFiles.Items.Count = 0 Then Exit Sub
 
-        Dim z As Integer
+        Try
+            Dim z As Integer
 
-        Dim intj As Integer
+            Dim intj As Integer
 
-        For z = 0 To lvFiles.SelectedItems.Count - 1
-            rCOUNT = (lvFiles.SelectedItems(z).Text)
-            intj = z
-        Next
+            For z = 0 To lvFiles.SelectedItems.Count - 1
+                rCOUNT = (lvFiles.SelectedItems(z).Text)
+                intj = z
+            Next
 
-        If MsgBox("Выбранные данные будут удалены" & vbCrLf & "Данные будут потеряны" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+            If MsgBox("Выбранные данные будут удалены" & vbCrLf & "Данные будут потеряны" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
-            If MassDel = False Then
+                If MassDel = False Then
 
-                AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
-                DELETE_FILE(rCOUNT)
+                    AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
+                    DELETE_FILE(rCOUNT)
 
-            Else
+                Else
 
-                intj = 0
-                Dim intj1 As Integer = 0
-
-                lvFiles.Select()
-
-                For intj = 0 To lvFiles.Items.Count - 1
-
-                    lvFiles.Items(intj).Selected = True
-                    lvFiles.Items(intj).EnsureVisible()
-
-                    If lvFiles.Items(intj).Checked = True Then
-
-                        intj1 = intj1 + 1
-
-                    End If
-
-                Next
-
-                If intj1 > 0 Then
+                    intj = 0
+                    Dim intj1 As Integer = 0
 
                     lvFiles.Select()
 
@@ -799,18 +799,39 @@ Public Class MainForm
 
                         If lvFiles.Items(intj).Checked = True Then
 
-                            Call DELETE_FILE(lvFiles.SelectedItems(intj).Text)
-                            AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
+                            intj1 = intj1 + 1
+
                         End If
 
                     Next
 
+                    If intj1 > 0 Then
+
+                        lvFiles.Select()
+
+                        For intj = 0 To lvFiles.Items.Count - 1
+
+                            lvFiles.Items(intj).Selected = True
+                            lvFiles.Items(intj).EnsureVisible()
+
+                            If lvFiles.Items(intj).Checked = True Then
+
+                                Call DELETE_FILE(lvFiles.SelectedItems(intj).Text)
+                                AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
+                            End If
+
+                        Next
+
+                    End If
+
                 End If
 
+                Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
             End If
 
-            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
-        End If
+        Catch ex As Exception
+
+        End Try
 
         lvFiles.CheckBoxes = False
         lvFiles.MultiSelect = False
@@ -831,17 +852,21 @@ Public Class MainForm
 
         End If
 
-        Dim sSQL As String
-        'Dim cmd As OleDbCommand
-        'Dim dr As OleDbDataReader
+        Try
+            Dim sSQL As String
+            'Dim cmd As OleDbCommand
+            'Dim dr As OleDbDataReader
 
-        sSQL = "Delete * FROM TBL_HASH where id =" & ssid
+            sSQL = "Delete * FROM TBL_HASH where id =" & ssid
 
-        DB7.Execute(sSQL)
+            DB7.Execute(sSQL)
 
-        'cmd = New OleDbCommand(sSQL, DB8)
-        'dr = cmd.ExecuteReader
-        'dr = Nothing
+            'cmd = New OleDbCommand(sSQL, DB8)
+            'dr = cmd.ExecuteReader
+            'dr = Nothing
+        Catch ex As Exception
+
+        End Try
 
     End Sub
 
@@ -971,30 +996,34 @@ Public Class MainForm
 
         If MsgBox("Все данные содержащиеся в базе данных" & vbCrLf & "будут удалены" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
-            Dim sSQL As String
-            'Dim cmd As OleDbCommand
-            'Dim dr As OleDbDataReader
+            Try
+                Dim sSQL As String
+                'Dim cmd As OleDbCommand
+                'Dim dr As OleDbDataReader
 
-            sSQL = "Delete * FROM TBL_HASH"
-            'cmd = New OleDbCommand(sSQL, DB8)
-            'dr = cmd.ExecuteReader
-            'dr = Nothing
+                sSQL = "Delete * FROM TBL_HASH"
+                'cmd = New OleDbCommand(sSQL, DB8)
+                'dr = cmd.ExecuteReader
+                'dr = Nothing
 
-            AddLogEntr("База данных очищена", 1)
+                AddLogEntr("База данных очищена", 1)
 
-            DB7.Execute(sSQL)
+                DB7.Execute(sSQL)
 
-            COMPARE_DB()
+                COMPARE_DB()
 
-            If IO.File.Exists(Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\change.log") Then
+                If IO.File.Exists(Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\change.log") Then
 
-                IO.File.Delete((Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\change.log"))
+                    IO.File.Delete((Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\change.log"))
 
-            End If
+                End If
+            Catch ex As Exception
+
+            End Try
 
         End If
-        lvFiles.Items.Clear()
 
+        lvFiles.Items.Clear()
         Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
     End Sub
@@ -1027,7 +1056,9 @@ Public Class MainForm
     End Sub
 
     Private Sub ДобавитьКаталогToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles addFolder.Click
-        Call ADD_DIR()
+        'Call ADD_DIR()
+        Me.BeginInvoke(New MethodInvoker(AddressOf ADD_DIR))
+
     End Sub
 
     Private Sub ОбновитьДанныеToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UpdateList.Click
@@ -1037,7 +1068,9 @@ Public Class MainForm
     End Sub
 
     Private Sub ОчиститьБазуДанныхToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearDB.Click
-        Call All_Delete()
+        'Call All_Delete()
+        Me.BeginInvoke(New MethodInvoker(AddressOf All_Delete))
+
     End Sub
 
     Private Sub ВыходToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles Exitmnu.Click
@@ -1514,7 +1547,6 @@ Public Class MainForm
             .Source = Application.ProductName
             .Log = "Application"
             .EnableRaisingEvents = True
-
 
             Select Case stmp
 
