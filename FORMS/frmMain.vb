@@ -61,8 +61,9 @@ Public Class MainForm
                     sSQL = "DELETE * FROM TBL_CONF"
                     DB7.Execute(sSQL)
 
-                    sSQL = "INSERT INTO FROM TBL_CONF (type) VALUES ('MD5')"
+                    sSQL = "INSERT INTO [TBL_CONF]([type],[vers]) VALUES('MD5','1')"
                     DB7.Execute(sSQL)
+
 
                     Call typeCRCLoad()
             End Select
@@ -201,6 +202,8 @@ Public Class MainForm
 
             AddLogEntr("Добавлен новый каталог: " & BasePath, 2)
 
+            DB7.Execute("INSERT INTO [TBL_DIR]([dir]) VALUES('" & BasePath & "')")
+
             Call find_file()
 
         Catch ex As Exception
@@ -217,7 +220,9 @@ Public Class MainForm
 
     End Sub
 
-    Private Sub ADD_DB_HASH(ByVal A1 As String, A2 As String, A3 As String)
+    Public Function File_ignore(ByVal sfile As String) As Boolean
+
+        If Len(sfile) = 0 Then Exit Function
 
         Dim sSQL As String
         Dim sCOUNT As Integer
@@ -225,7 +230,7 @@ Public Class MainForm
         Try
 
             Dim d() As String
-            d = Split(A1, ".")
+            d = Split(sfile, ".")
 
             sSQL = "SELECT count(*) as t_n FROM TBL_IGNORE WHERE type='" & d(1) & "'"
 
@@ -243,53 +248,41 @@ Public Class MainForm
 
                 Case 0
 
+                    File_ignore = False
+
                 Case Else
 
-                    Exit Sub
+                    File_ignore = True
 
             End Select
 
         Catch ex As Exception
 
-        End Try
-
-        ' sSQL = "INSERT INTO [TBL_HASH]([file],[hash],[dttm]) VALUES(@item1,@item2,@item3)"
-
-        sSQL = "INSERT INTO [TBL_HASH]([file],[hash],[dttm]) VALUES('" & A1 & "','" & A2 & "','" & A3 & "')"
-
-        Try
-
-            DB7.Execute(sSQL)
-
-            'Dim cmdInsert As New OleDbCommand
-            'Dim iSqlStatus As Integer
-
-            'cmdInsert.Parameters.Clear()
-
-            'With cmdInsert
-
-            '    .CommandText = sSQL
-            '    .CommandType = CommandType.Text
-            '    .Parameters.AddWithValue("@value1", A1)
-            '    .Parameters.AddWithValue("@value2", A2)
-            '    .Parameters.AddWithValue("@value3", A3)
-
-            '    .Connection = DB8
-
-            'End With
-
-            'iSqlStatus = cmdInsert.ExecuteNonQuery
-
-            'If Not iSqlStatus = 0 Then
-
-            'Else
-
-            'End If
-        Catch ex As Exception
-            MsgBox(ex.Message)
-        Finally
+            File_ignore = False
 
         End Try
+
+    End Function
+
+    Private Sub ADD_DB_HASH(ByVal A1 As String, A2 As String, A3 As String)
+
+        Dim sSQL As String
+
+        If Not File_ignore(A1) Then
+
+            sSQL = "INSERT INTO [TBL_HASH]([file],[hash],[dttm]) VALUES('" & A1 & "','" & A2 & "','" & A3 & "')"
+
+            Try
+
+                DB7.Execute(sSQL)
+
+            Catch ex As Exception
+                MsgBox(ex.Message)
+            Finally
+
+            End Try
+
+        End If
 
 
     End Sub
@@ -312,91 +305,79 @@ Public Class MainForm
 
         For Each dir In dirs
 
-            lvFiles.Items.Add(lvFiles.Items.Count + 1)
-            lvFiles.Items(intcount).SubItems.Add(dir)
+            If Not File_ignore(dir) Then
 
-            Select Case typeCRC
+                lvFiles.Items.Add(lvFiles.Items.Count + 1)
+                lvFiles.Items(intcount).SubItems.Add(dir)
 
-                Case "MD5"
-                    thisHash = GetHash(dir)
+                Select Case typeCRC
 
-                Case "Crc32"
+                    Case "MD5"
+                        thisHash = GetHash(dir)
 
-                    thisHash = GetCRC32(dir)
+                    Case "Crc32"
 
-                Case "SHA256"
+                        thisHash = GetCRC32(dir)
 
-                    thisHash = GetSHA256(dir)
+                    Case "SHA256"
 
-                Case "SHA512"
+                        thisHash = GetSHA256(dir)
 
-                    thisHash = GetSHA512(dir)
+                    Case "SHA512"
 
-                Case "SHA1"
+                        thisHash = GetSHA512(dir)
 
-                    thisHash = GetSHA1(dir)
+                    Case "SHA1"
 
-                Case "GOST"
+                        thisHash = GetSHA1(dir)
 
-                    ' thisHash = GetGOST(FileToByteArray(dir))
+                    Case "GOST"
 
-                Case Else
+                        ' thisHash = GetGOST(FileToByteArray(dir))
 
-                    MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
+                    Case Else
 
-                    frmChS.ShowDialog(Me)
+                        MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
 
-            End Select
+                        frmChS.ShowDialog(Me)
 
-            lvFiles.Items(intcount).SubItems.Add(thisHash)
+                End Select
 
-            Dim sSQL As String
-            Dim sCOUNT As Integer
+                lvFiles.Items(intcount).SubItems.Add(thisHash)
 
-            sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
+                Dim sSQL As String
+                Dim sCOUNT As Integer
 
-            'Dim cmd As OleDbCommand
-            'Dim rs As OleDbDataReader
+                sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
 
-            'cmd = New OleDbCommand(sSQL, DB8)
-            'rs = cmd.ExecuteReader
+                Dim rs As Recordset
+                rs = New Recordset
+                rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
 
-            'While rs.Read
+                With rs
+                    sCOUNT = .Fields("t_n").Value
+                End With
+                rs.Close()
+                rs = Nothing
 
-            '    sCOUNT = rs.Item("t_n")
+                Select Case sCOUNT
 
-            'End While
-            'rs.Close()
-            'rs = Nothing
-
-            Dim rs As Recordset
-            rs = New Recordset
-            rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
-
-            With rs
-                sCOUNT = .Fields("t_n").Value
-            End With
-            rs.Close()
-            rs = Nothing
-
-            Select Case sCOUNT
-
-                Case 0
-                    ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
-                Case Else
-
-                    If Not RSExistsHash(dir) Then
+                    Case 0
                         ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
-                    End If
+                    Case Else
 
-            End Select
+                        If Not RSExistsHash(dir) Then
+                            ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
+                        End If
 
-            intcount = intcount + 1
+                End Select
+
+                intcount = intcount + 1
+            End If
 
         Next
 
-        ' Catch ex As Exception
-        'MsgBox(ex.Message)
+      
         ResList(lvFiles)
         'End Try
 
@@ -407,7 +388,6 @@ Public Class MainForm
     Private Sub find_file_re()
 
         Me.Cursor = Cursors.WaitCursor
-
 
         lvFiles.Sorting = SortOrder.None
         lvFiles.ListViewItemSorter = Nothing
@@ -433,38 +413,6 @@ Public Class MainForm
             Dim sSQL As String
 
             sSQL = "SELECT * FROM TBL_HASH"
-
-            'Dim cmd As OleDbCommand
-            'Dim rs As OleDbDataReader
-            'cmd = New OleDbCommand(sSQL, DB8)
-            'rs = cmd.ExecuteReader
-
-            'While rs.Read
-
-            '    lvFiles.Items.Add(rs.Item("id"))
-            '    lvFiles.Items(intcount).SubItems.Add(rs.Item("file"))
-            '    lvFiles.Items(intcount).SubItems.Add(rs.Item("hash"))
-
-            '    Dim uname, uname1 As String
-            '    uname = rs.Item("file")
-            '    uname1 = rs.Item("hash")
-            '    Dim newHash As String = GetHash(rs.Item("file"))
-
-            '    If rs.Item("hash") = newHash Then
-
-            '        lvFiles.Items(intcount).SubItems.Add("Ok")
-
-            '    Else
-            '        lvFiles.Items(intcount).SubItems.Add("No")
-            '        lvFiles.Items(CInt(intcount)).ForeColor = Color.Cyan
-            '        lvFiles.Items(CInt(intcount)).BackColor = Color.Red
-            '        intj = intj + 1
-            '    End If
-
-            '    intcount = intcount + 1
-            'End While
-            'rs.Close()
-            'rs = Nothing
 
             Dim rs As Recordset
 
@@ -785,48 +733,72 @@ Public Class MainForm
                     AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
                     DELETE_FILE(rCOUNT)
 
-                Else
-
-                    intj = 0
-                    Dim intj1 As Integer = 0
-
-                    lvFiles.Select()
-
-                    For intj = 0 To lvFiles.Items.Count - 1
-
-                        lvFiles.Items(intj).Selected = True
-                        lvFiles.Items(intj).EnsureVisible()
-
-                        If lvFiles.Items(intj).Checked = True Then
-
-                            intj1 = intj1 + 1
-
+                    For i = lvFiles.Items.Count - 1 To 0 Step -1
+                        If lvFiles.Items(i).Selected Then
+                            lvFiles.Items(i).Remove()
                         End If
-
                     Next
 
-                    If intj1 > 0 Then
+                Else
 
-                        lvFiles.Select()
+                    'intj = 0
+                    'Dim intj1 As Integer = 0
 
-                        For intj = 0 To lvFiles.Items.Count - 1
+                    'lvFiles.Select()
 
-                            lvFiles.Items(intj).Selected = True
-                            lvFiles.Items(intj).EnsureVisible()
+                    'For intj = 0 To lvFiles.Items.Count - 1
 
-                            If lvFiles.Items(intj).Checked = True Then
+                    '    lvFiles.Items(intj).Selected = True
+                    '    lvFiles.Items(intj).EnsureVisible()
 
-                                Call DELETE_FILE(lvFiles.SelectedItems(intj).Text)
-                                AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
-                            End If
+                    '    Select Case lvFiles.Items(intj).Checked
+                    '        Case True
+                    '            intj1 = intj1 + 1
+                    '        Case Else
+                    '    End Select
 
-                        Next
+                    'Next
 
-                    End If
+                    'If intj1 > 0 Then
+
+                    '    lvFiles.Select()
+                    '    intj = 0
+                    '    For intj = 0 To lvFiles.Items.Count - 1
+
+                    '        lvFiles.Items(intj).Selected = True
+                    '        lvFiles.Items(intj).EnsureVisible()
+
+                    '        Select Case lvFiles.Items(intj).Checked
+
+                    '            Case True
+                    '                Call DELETE_FILE(lvFiles.SelectedItems(intj).Text)
+                    '                'lvFiles.Items.RemoveAt(intj)
+                    '                AddLogEntr("Удален файл: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Записанная контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
+
+                    '            Case Else
+                    '        End Select
+                    '    Next
+
+                    '    intj = 0
+                    '    For intj = 0 To lvFiles.Items.Count - 1
+
+                    '        lvFiles.Items(intj).Selected = True
+                    '        lvFiles.Items(intj).EnsureVisible()
+
+                    '        Select Case lvFiles.Items(intj).Checked
+                    '            Case True
+                    '                lvFiles.Items.RemoveAt(intj)
+                    '            Case Else
+                    '        End Select
+
+                    '    Next
+
+                    'End If
 
                 End If
 
-                Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                'Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+
             End If
 
         Catch ex As Exception
@@ -836,6 +808,8 @@ Public Class MainForm
         lvFiles.CheckBoxes = False
         lvFiles.MultiSelect = False
         MassDel = False
+
+        'Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
     End Sub
 
@@ -853,17 +827,11 @@ Public Class MainForm
         End If
 
         Try
-            Dim sSQL As String
-            'Dim cmd As OleDbCommand
-            'Dim dr As OleDbDataReader
 
+            Dim sSQL As String
             sSQL = "Delete * FROM TBL_HASH where id =" & ssid
 
             DB7.Execute(sSQL)
-
-            'cmd = New OleDbCommand(sSQL, DB8)
-            'dr = cmd.ExecuteReader
-            'dr = Nothing
         Catch ex As Exception
 
         End Try
@@ -998,17 +966,16 @@ Public Class MainForm
 
             Try
                 Dim sSQL As String
-                'Dim cmd As OleDbCommand
-                'Dim dr As OleDbDataReader
 
                 sSQL = "Delete * FROM TBL_HASH"
-                'cmd = New OleDbCommand(sSQL, DB8)
-                'dr = cmd.ExecuteReader
-                'dr = Nothing
+                DB7.Execute(sSQL)
+
+
+                sSQL = "Delete * FROM TBL_DIR"
+                DB7.Execute(sSQL)
+
 
                 AddLogEntr("База данных очищена", 1)
-
-                DB7.Execute(sSQL)
 
                 COMPARE_DB()
 
@@ -1456,47 +1423,51 @@ Public Class MainForm
         fdlg.RestoreDirectory = True
 
         If fdlg.ShowDialog() = DialogResult.OK Then
-            Me.Cursor = Cursors.WaitCursor
 
-            Dim thisHash As String
+            If Not File_ignore(fdlg.FileName) Then
 
-            Select Case typeCRC
+                Me.Cursor = Cursors.WaitCursor
 
-                Case "MD5"
-                    thisHash = GetHash(fdlg.FileName)
+                Dim thisHash As String
 
-                Case "Crc32"
+                Select Case typeCRC
 
-                    thisHash = GetCRC32(fdlg.FileName)
+                    Case "MD5"
+                        thisHash = GetHash(fdlg.FileName)
 
-                Case "SHA256"
+                    Case "Crc32"
+                        thisHash = GetCRC32(fdlg.FileName)
 
-                    thisHash = GetSHA256(fdlg.FileName)
+                    Case "SHA256"
+                        thisHash = GetSHA256(fdlg.FileName)
 
-                Case "SHA512"
+                    Case "SHA512"
+                        thisHash = GetSHA512(fdlg.FileName)
 
-                    thisHash = GetSHA512(fdlg.FileName)
+                    Case "SHA1"
+                        thisHash = GetSHA1(fdlg.FileName)
 
-                Case "SHA1"
+                    Case Else
+                        MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
 
-                    thisHash = GetSHA1(fdlg.FileName)
+                        frmChS.ShowDialog(Me)
 
-                Case Else
+                End Select
 
-                    MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
+                If Not RSExistsHash(fdlg.FileName) Then
+                    ADD_DB_HASH(fdlg.FileName, thisHash, DateAndTime.Now)
 
-                    frmChS.ShowDialog(Me)
+                    AddLogEntr("Добавлен новый файл: " & fdlg.FileName & vbCrLf & "Расчитанная контрольная сумма: " & thisHash, 2)
 
-            End Select
+                End If
 
-            If Not RSExistsHash(fdlg.FileName) Then
-                ADD_DB_HASH(fdlg.FileName, thisHash, DateAndTime.Now)
+                Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
-                AddLogEntr("Добавлен новый файл: " & fdlg.FileName & vbCrLf & "Расчитанная контрольная сумма: " & thisHash, 2)
+
+            Else
+                MsgBox("Тип файла находится в списке игнориремых, для его добавления необхадимо его удалить из списка.", MsgBoxStyle.Exclamation, Application.ProductName)
 
             End If
-
-            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
         Else
 
@@ -1569,4 +1540,172 @@ Public Class MainForm
     '    Console.WriteLine(("Written: " + e.Entry.Message))
     'End Sub
 
+    Private Sub Find_New_Files()
+
+        Dim intcount As Integer
+        Dim thisHash As String
+        Dim sSQL As String
+        Dim sCOUNT As Integer
+
+        sSQL = "SELECT count(*) as t_n FROM TBL_DIR"
+
+        Dim rs As Recordset
+        rs = New Recordset
+        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+        With rs
+            sCOUNT = .Fields("t_n").Value
+        End With
+        rs.Close()
+        rs = Nothing
+
+        If sCOUNT = 0 Then
+            MsgBox("Не указаны каталоги для сканировоания", MsgBoxStyle.Exclamation, Application.ProductName)
+            frmAdd_dir.ShowDialog(Me)
+            Exit Sub
+        End If
+
+        sSQL = "SELECT * FROM TBL_DIR"
+
+
+        rs = New Recordset
+        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+        With rs
+            .MoveFirst()
+            Do While Not .EOF
+
+                Dim dirs() As String = Directory.GetFiles(.Fields("dir").Value, "*.*", SearchOption.AllDirectories)
+                Dim dir As String
+
+                For Each dir In dirs
+
+                    If Not File_ignore(dir) Then
+
+                        Select Case typeCRC
+
+                            Case "MD5"
+                                thisHash = GetHash(dir)
+
+                            Case "Crc32"
+
+                                thisHash = GetCRC32(dir)
+
+                            Case "SHA256"
+
+                                thisHash = GetSHA256(dir)
+
+                            Case "SHA512"
+
+                                thisHash = GetSHA512(dir)
+
+                            Case "SHA1"
+
+                                thisHash = GetSHA1(dir)
+
+                            Case "GOST"
+
+                            Case Else
+
+                        End Select
+
+                        sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
+
+                        Dim rs1 As Recordset
+                        rs1 = New Recordset
+                        rs1.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+                        With rs1
+                            sCOUNT = .Fields("t_n").Value
+                        End With
+                        rs1.Close()
+                        rs1 = Nothing
+
+                        Select Case sCOUNT
+
+                            Case 0
+                                'ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
+                            Case Else
+
+                                If Not RSExistsHash(dir) Then
+                                    ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
+                                End If
+
+                        End Select
+
+                        intcount = intcount + 1
+                    End If
+
+                Next
+
+                .MoveNext()
+            Loop
+        End With
+
+        rs.Close()
+        rs = Nothing
+
+        Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+
+    End Sub
+
+    Private Sub СканироватьКаталогиНаПредметНовыхФайловToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles MnuScanDir.Click
+        Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+    End Sub
+
+    Private Sub FindNewFiles_Click(sender As Object, e As EventArgs) Handles FindNewFiles.Click
+        Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+    End Sub
+
+    Private Sub addToIgnore_Click(sender As Object, e As EventArgs) Handles addToIgnore.Click
+
+        Dim sSQL As String
+        Dim sCOUNT As Integer
+        Dim intj As Integer = 0
+        Dim path1 As String
+        Dim d() As String
+        Dim A As Integer
+
+        Try
+
+            For z = 0 To lvFiles.SelectedItems.Count - 1
+                path1 = lvFiles.SelectedItems(intj).SubItems(1).Text
+                intj = z
+            Next
+
+            d = Split(path1, ".")
+
+            A = d.Length - 1
+
+            sSQL = "SELECT count(*) as t_n FROM TBL_IGNORE WHERE type='" & d(A) & "'"
+
+            Dim rs As Recordset
+            rs = New Recordset
+            rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+            With rs
+                sCOUNT = .Fields("t_n").Value
+            End With
+            rs.Close()
+            rs = Nothing
+
+            Select Case sCOUNT
+
+                Case 0
+
+                    sSQL = "INSERT INTO [TBL_IGNORE]([type]) VALUES('" & d(A) & "')"
+                    DB7.Execute(sSQL)
+
+                Case Else
+
+
+            End Select
+        Catch ex As Exception
+
+        End Try
+
+        
+
+
+    End Sub
 End Class

@@ -41,37 +41,64 @@ Module MOD_DATABASE
     End Sub
 
     Public Sub LoadDatabase(Optional ByRef sFile As String = "")
-        On Error GoTo ERR1
-        Dim MyShadowPassword As String
+        ' On Error GoTo ERR1
+
+        Try
+
+            Dim MyShadowPassword As String
+
+            MyShadowPassword = ""
+            BP = Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\"
+
+            Base_Name = "db.mdb"
+            sFile = Base_Name
 
 
-        MyShadowPassword = ""
-        BP = Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\"
+            If IO.File.Exists(BP & "\" & sFile) Then
 
-        Base_Name = "db.mdb"
-        sFile = Base_Name
+            Else
 
+                MsgBox("Не найден файл базы данных" & vbCrLf & "Обратитесь к производителю", MsgBoxStyle.Critical)
+                End
+                'Call CREATE_DATABASE()
 
-        If IO.File.Exists(BP & "\" & sFile) Then
-
-        Else
-
-            MsgBox("Не найден файл базы данных" & vbCrLf & "Обратитесь к производителю", MsgBoxStyle.Critical)
-            End
-            'Call CREATE_DATABASE()
+            End If
 
 
-        End If
+            'ConNect = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & BP & "\" & sFile & ";User Id=admin;Password=;"
+            'DB8 = New OleDbConnection(ConNect)
+            'DB8.Open()
+
+            ' DB7.Open("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" & BP & "\" & sFile & ";Exclusive=1;Uid=admin;Pwd=;")
+
+            DB7 = New Connection
+            DB7.Open("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & BP & "\" & sFile & ";Jet OLEDB:Database Password=" & MyShadowPassword & ";")
+
+        Catch ex As Exception
+
+        End Try
 
 
-        'ConNect = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & BP & "\" & sFile & ";User Id=admin;Password=;"
-        'DB8 = New OleDbConnection(ConNect)
-        'DB8.Open()
 
-        ' DB7.Open("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" & BP & "\" & sFile & ";Exclusive=1;Uid=admin;Pwd=;")
+        'Проверяем версию базы данных
+        Try
+            Dim sSQL, Vers1 As String
+            sSQL = "SELECT VERS FROM TBL_CONF"
 
-        DB7 = New Connection
-        DB7.Open("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & BP & "\" & sFile & ";Jet OLEDB:Database Password=" & MyShadowPassword & ";")
+            Dim rs As Recordset
+
+            rs = New Recordset
+            rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+            With rs
+                Vers1 = .Fields("VERS").Value
+            End With
+            rs.Close()
+            rs = Nothing
+
+        Catch ex As Exception
+            Call ADD_TABLE_()
+        End Try
 
         Exit Sub
 ERR1:
@@ -87,29 +114,31 @@ ERR1:
 
     End Sub
 
+    Private Sub ADD_TABLE_()
+
+        Dim sSQL As String
+        sSQL = "CREATE TABLE TBL_DIR(id counter, dir TEXT(255))"
+        DB7.Execute(sSQL)
+
+
+        sSQL = "ALTER TABLE TBL_CONF ADD COLUMN VERS varchar(50)"
+        DB7.Execute(sSQL)
+
+        sSQL = "UPDATE TBL_CONF SET VERS='1'"
+        DB7.Execute(sSQL)
+
+    End Sub
+
+
     Public Function RSExistsHash(ByVal sGroupName As String) As Boolean
         On Error GoTo Error_
         RSExistsHash = False
         Dim sSQL As String
         Dim sCOUNT As String
 
-        'sGroupName = Replace(sGroupName, "'", " ")
         If Len(sGroupName) = 0 Then Exit Function
 
         sSQL = "SELECT COUNT(*) AS t_n FROM TBL_HASH WHERE file='" & sGroupName & "'"
-
-        'Dim cmd As OleDbCommand
-        'Dim rs As OleDbDataReader
-
-        'cmd = New OleDbCommand(sSQL, DB8)
-        'rs = cmd.ExecuteReader
-        'While rs.Read
-
-        '    sCOUNT = rs.Item("total_number")
-
-        'End While
-        'rs.Close()
-        'rs = Nothing
 
         Dim rs As Recordset
         rs = New Recordset
@@ -124,16 +153,11 @@ ERR1:
         Select Case sCOUNT
 
             Case 0
-
+                RSExistsHash = False
             Case Else
                 RSExistsHash = True
-                Exit Function
+
         End Select
-
-        rs.Close()
-        rs = Nothing
-
-        RSExistsHash = False
 
         Exit Function
 Error_:

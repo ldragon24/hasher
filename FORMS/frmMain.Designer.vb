@@ -33,28 +33,10 @@ Partial Class MainForm
         Me.stat2 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.ToolStripStatusLabel2 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.notfind = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.pb1 = New System.Windows.Forms.ToolStripProgressBar()
         Me.ilsCommands = New System.Windows.Forms.ImageList(Me.components)
         Me.cmBmenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
-        Me.addFoldertoBranch = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ДобавитьФайлToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.RepAddBrToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.UpdateData = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ПоискДубликатаToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.mnuDeltoBranch = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
-        Me.AllDeleteDB = New System.Windows.Forms.ToolStripMenuItem()
-        Me.M_exit = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
-        Me.МенюToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.addFolder = New System.Windows.Forms.ToolStripMenuItem()
-        Me.addFile = New System.Windows.Forms.ToolStripMenuItem()
-        Me.UpdateList = New System.Windows.Forms.ToolStripMenuItem()
-        Me.IgnoreFile = New System.Windows.Forms.ToolStripMenuItem()
-        Me.SaveList = New System.Windows.Forms.ToolStripMenuItem()
-        Me.findDouble = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ClearDB = New System.Windows.Forms.ToolStripMenuItem()
-        Me.SetupPrg = New System.Windows.Forms.ToolStripMenuItem()
-        Me.Exitmnu = New System.Windows.Forms.ToolStripMenuItem()
         Me.ОПрограммеToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TableLayoutPanel2 = New System.Windows.Forms.TableLayoutPanel()
         Me.lvFilesF = New System.Windows.Forms.ListView()
@@ -64,10 +46,31 @@ Partial Class MainForm
         Me.cmenuNI = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.РазвернутьToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripSeparator()
-        Me.НастройкиToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripSeparator()
+        Me.МенюToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.addFolder = New System.Windows.Forms.ToolStripMenuItem()
+        Me.addFile = New System.Windows.Forms.ToolStripMenuItem()
+        Me.UpdateList = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MnuScanDir = New System.Windows.Forms.ToolStripMenuItem()
+        Me.IgnoreFile = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SaveList = New System.Windows.Forms.ToolStripMenuItem()
+        Me.findDouble = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ClearDB = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SetupPrg = New System.Windows.Forms.ToolStripMenuItem()
+        Me.Exitmnu = New System.Windows.Forms.ToolStripMenuItem()
+        Me.addFoldertoBranch = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ДобавитьФайлToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.RepAddBrToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.addToIgnore = New System.Windows.Forms.ToolStripMenuItem()
+        Me.UpdateData = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ПоискДубликатаToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.FindNewFiles = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuDeltoBranch = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.AllDeleteDB = New System.Windows.Forms.ToolStripMenuItem()
+        Me.M_exit = New System.Windows.Forms.ToolStripMenuItem()
+        Me.НастройкиToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ВыходToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
-        Me.pb1 = New System.Windows.Forms.ToolStripProgressBar()
         Me.StatusStrip1.SuspendLayout()
         Me.cmBmenu.SuspendLayout()
         Me.MenuStrip1.SuspendLayout()
@@ -147,6 +150,11 @@ Partial Class MainForm
         Me.notfind.Size = New System.Drawing.Size(12, 17)
         Me.notfind.Text = "-"
         '
+        'pb1
+        '
+        Me.pb1.Name = "pb1"
+        Me.pb1.Size = New System.Drawing.Size(100, 16)
+        '
         'ilsCommands
         '
         Me.ilsCommands.ImageStream = CType(resources.GetObject("ilsCommands.ImageStream"), System.Windows.Forms.ImageListStreamer)
@@ -161,73 +169,9 @@ Partial Class MainForm
         '
         'cmBmenu
         '
-        Me.cmBmenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFoldertoBranch, Me.ДобавитьФайлToolStripMenuItem, Me.RepAddBrToolStripMenuItem, Me.UpdateData, Me.ПоискДубликатаToolStripMenuItem, Me.mnuDeltoBranch, Me.ToolStripMenuItem1, Me.AllDeleteDB, Me.M_exit})
+        Me.cmBmenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFoldertoBranch, Me.ДобавитьФайлToolStripMenuItem, Me.RepAddBrToolStripMenuItem, Me.addToIgnore, Me.UpdateData, Me.ПоискДубликатаToolStripMenuItem, Me.FindNewFiles, Me.mnuDeltoBranch, Me.ToolStripMenuItem1, Me.AllDeleteDB, Me.M_exit})
         Me.cmBmenu.Name = "cmMENU"
-        Me.cmBmenu.Size = New System.Drawing.Size(207, 202)
-        '
-        'addFoldertoBranch
-        '
-        Me.addFoldertoBranch.Image = Global.HASHER.My.Resources.Resources.fadd
-        Me.addFoldertoBranch.Name = "addFoldertoBranch"
-        Me.addFoldertoBranch.Size = New System.Drawing.Size(206, 22)
-        Me.addFoldertoBranch.Text = "Добавить папку"
-        '
-        'ДобавитьФайлToolStripMenuItem
-        '
-        Me.ДобавитьФайлToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.add
-        Me.ДобавитьФайлToolStripMenuItem.Name = "ДобавитьФайлToolStripMenuItem"
-        Me.ДобавитьФайлToolStripMenuItem.Size = New System.Drawing.Size(206, 22)
-        Me.ДобавитьФайлToolStripMenuItem.Text = "Добавить файл"
-        '
-        'RepAddBrToolStripMenuItem
-        '
-        Me.RepAddBrToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.ok
-        Me.RepAddBrToolStripMenuItem.Name = "RepAddBrToolStripMenuItem"
-        Me.RepAddBrToolStripMenuItem.Size = New System.Drawing.Size(206, 22)
-        Me.RepAddBrToolStripMenuItem.Text = "Принять изменения"
-        '
-        'UpdateData
-        '
-        Me.UpdateData.Image = Global.HASHER.My.Resources.Resources.pcupdate
-        Me.UpdateData.Name = "UpdateData"
-        Me.UpdateData.Size = New System.Drawing.Size(206, 22)
-        Me.UpdateData.Text = "Обновить данные"
-        '
-        'ПоискДубликатаToolStripMenuItem
-        '
-        Me.ПоискДубликатаToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.update
-        Me.ПоискДубликатаToolStripMenuItem.Name = "ПоискДубликатаToolStripMenuItem"
-        Me.ПоискДубликатаToolStripMenuItem.Size = New System.Drawing.Size(206, 22)
-        Me.ПоискДубликатаToolStripMenuItem.Text = "Поиск дубликата"
-        '
-        'mnuDeltoBranch
-        '
-        Me.mnuDeltoBranch.Image = Global.HASHER.My.Resources.Resources.remove
-        Me.mnuDeltoBranch.Name = "mnuDeltoBranch"
-        Me.mnuDeltoBranch.Size = New System.Drawing.Size(206, 22)
-        Me.mnuDeltoBranch.Text = "Удалить"
-        '
-        'ToolStripMenuItem1
-        '
-        Me.ToolStripMenuItem1.Image = Global.HASHER.My.Resources.Resources.delete
-        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(206, 22)
-        Me.ToolStripMenuItem1.Text = "Массовое удаление"
-        '
-        'AllDeleteDB
-        '
-        Me.AllDeleteDB.Image = Global.HASHER.My.Resources.Resources.servnz
-        Me.AllDeleteDB.Name = "AllDeleteDB"
-        Me.AllDeleteDB.Size = New System.Drawing.Size(206, 22)
-        Me.AllDeleteDB.Text = "Полная очистка данных"
-        Me.AllDeleteDB.Visible = False
-        '
-        'M_exit
-        '
-        Me.M_exit.Image = Global.HASHER.My.Resources.Resources._exit
-        Me.M_exit.Name = "M_exit"
-        Me.M_exit.Size = New System.Drawing.Size(206, 22)
-        Me.M_exit.Text = "Выход"
+        Me.cmBmenu.Size = New System.Drawing.Size(282, 246)
         '
         'MenuStrip1
         '
@@ -237,85 +181,6 @@ Partial Class MainForm
         Me.MenuStrip1.Size = New System.Drawing.Size(1202, 24)
         Me.MenuStrip1.TabIndex = 7
         Me.MenuStrip1.Text = "MenuStrip1"
-        '
-        'МенюToolStripMenuItem
-        '
-        Me.МенюToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFolder, Me.addFile, Me.UpdateList, Me.IgnoreFile, Me.SaveList, Me.findDouble, Me.ClearDB, Me.SetupPrg, Me.Exitmnu})
-        Me.МенюToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.service
-        Me.МенюToolStripMenuItem.Name = "МенюToolStripMenuItem"
-        Me.МенюToolStripMenuItem.Size = New System.Drawing.Size(69, 20)
-        Me.МенюToolStripMenuItem.Text = "Меню"
-        '
-        'addFolder
-        '
-        Me.addFolder.Image = Global.HASHER.My.Resources.Resources.fadd
-        Me.addFolder.Name = "addFolder"
-        Me.addFolder.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.O), System.Windows.Forms.Keys)
-        Me.addFolder.Size = New System.Drawing.Size(272, 22)
-        Me.addFolder.Text = "Добавить каталог"
-        '
-        'addFile
-        '
-        Me.addFile.Image = Global.HASHER.My.Resources.Resources.add
-        Me.addFile.Name = "addFile"
-        Me.addFile.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.F), System.Windows.Forms.Keys)
-        Me.addFile.Size = New System.Drawing.Size(272, 22)
-        Me.addFile.Text = "Добавить файл"
-        '
-        'UpdateList
-        '
-        Me.UpdateList.Image = Global.HASHER.My.Resources.Resources.pcupdate
-        Me.UpdateList.Name = "UpdateList"
-        Me.UpdateList.ShortcutKeys = System.Windows.Forms.Keys.F5
-        Me.UpdateList.Size = New System.Drawing.Size(272, 22)
-        Me.UpdateList.Text = "Обновить данные"
-        '
-        'IgnoreFile
-        '
-        Me.IgnoreFile.Image = Global.HASHER.My.Resources.Resources.B8
-        Me.IgnoreFile.Name = "IgnoreFile"
-        Me.IgnoreFile.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.I), System.Windows.Forms.Keys)
-        Me.IgnoreFile.Size = New System.Drawing.Size(272, 22)
-        Me.IgnoreFile.Text = "Игнорируемые типы файлов"
-        '
-        'SaveList
-        '
-        Me.SaveList.Image = Global.HASHER.My.Resources.Resources.save
-        Me.SaveList.Name = "SaveList"
-        Me.SaveList.ShortcutKeys = System.Windows.Forms.Keys.F2
-        Me.SaveList.Size = New System.Drawing.Size(272, 22)
-        Me.SaveList.Text = "Сохранить список в файл"
-        '
-        'findDouble
-        '
-        Me.findDouble.Image = Global.HASHER.My.Resources.Resources.update
-        Me.findDouble.Name = "findDouble"
-        Me.findDouble.Size = New System.Drawing.Size(272, 22)
-        Me.findDouble.Text = "Поиск дубликатов"
-        '
-        'ClearDB
-        '
-        Me.ClearDB.Image = Global.HASHER.My.Resources.Resources.servnz
-        Me.ClearDB.Name = "ClearDB"
-        Me.ClearDB.ShortcutKeys = CType((System.Windows.Forms.Keys.Shift Or System.Windows.Forms.Keys.Delete), System.Windows.Forms.Keys)
-        Me.ClearDB.Size = New System.Drawing.Size(272, 22)
-        Me.ClearDB.Text = "Очистить базу данных"
-        '
-        'SetupPrg
-        '
-        Me.SetupPrg.Image = Global.HASHER.My.Resources.Resources.setup
-        Me.SetupPrg.Name = "SetupPrg"
-        Me.SetupPrg.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
-        Me.SetupPrg.Size = New System.Drawing.Size(272, 22)
-        Me.SetupPrg.Text = "Настройки"
-        '
-        'Exitmnu
-        '
-        Me.Exitmnu.Image = Global.HASHER.My.Resources.Resources._exit
-        Me.Exitmnu.Name = "Exitmnu"
-        Me.Exitmnu.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.F4), System.Windows.Forms.Keys)
-        Me.Exitmnu.Size = New System.Drawing.Size(272, 22)
-        Me.Exitmnu.Text = "Выход"
         '
         'ОПрограммеToolStripMenuItem
         '
@@ -405,6 +270,176 @@ Partial Class MainForm
         Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
         Me.ToolStripMenuItem3.Size = New System.Drawing.Size(132, 6)
         '
+        'ToolStripMenuItem4
+        '
+        Me.ToolStripMenuItem4.Name = "ToolStripMenuItem4"
+        Me.ToolStripMenuItem4.Size = New System.Drawing.Size(132, 6)
+        '
+        'МенюToolStripMenuItem
+        '
+        Me.МенюToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.addFolder, Me.addFile, Me.UpdateList, Me.MnuScanDir, Me.findDouble, Me.IgnoreFile, Me.SaveList, Me.ClearDB, Me.SetupPrg, Me.Exitmnu})
+        Me.МенюToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.service
+        Me.МенюToolStripMenuItem.Name = "МенюToolStripMenuItem"
+        Me.МенюToolStripMenuItem.Size = New System.Drawing.Size(69, 20)
+        Me.МенюToolStripMenuItem.Text = "Меню"
+        '
+        'addFolder
+        '
+        Me.addFolder.Image = Global.HASHER.My.Resources.Resources.fadd
+        Me.addFolder.Name = "addFolder"
+        Me.addFolder.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.O), System.Windows.Forms.Keys)
+        Me.addFolder.Size = New System.Drawing.Size(272, 22)
+        Me.addFolder.Text = "Добавить каталог"
+        '
+        'addFile
+        '
+        Me.addFile.Image = Global.HASHER.My.Resources.Resources.add
+        Me.addFile.Name = "addFile"
+        Me.addFile.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.F), System.Windows.Forms.Keys)
+        Me.addFile.Size = New System.Drawing.Size(272, 22)
+        Me.addFile.Text = "Добавить файл"
+        '
+        'UpdateList
+        '
+        Me.UpdateList.Image = Global.HASHER.My.Resources.Resources.pcupdate
+        Me.UpdateList.Name = "UpdateList"
+        Me.UpdateList.ShortcutKeys = System.Windows.Forms.Keys.F5
+        Me.UpdateList.Size = New System.Drawing.Size(272, 22)
+        Me.UpdateList.Text = "Обновить данные"
+        '
+        'MnuScanDir
+        '
+        Me.MnuScanDir.Image = Global.HASHER.My.Resources.Resources.updatefolder
+        Me.MnuScanDir.Name = "MnuScanDir"
+        Me.MnuScanDir.Size = New System.Drawing.Size(272, 22)
+        Me.MnuScanDir.Text = "Поиск новых файлов"
+        '
+        'IgnoreFile
+        '
+        Me.IgnoreFile.Image = Global.HASHER.My.Resources.Resources.B8
+        Me.IgnoreFile.Name = "IgnoreFile"
+        Me.IgnoreFile.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.I), System.Windows.Forms.Keys)
+        Me.IgnoreFile.Size = New System.Drawing.Size(272, 22)
+        Me.IgnoreFile.Text = "Игнорируемые типы файлов"
+        '
+        'SaveList
+        '
+        Me.SaveList.Image = Global.HASHER.My.Resources.Resources.save
+        Me.SaveList.Name = "SaveList"
+        Me.SaveList.ShortcutKeys = System.Windows.Forms.Keys.F2
+        Me.SaveList.Size = New System.Drawing.Size(272, 22)
+        Me.SaveList.Text = "Сохранить список в файл"
+        '
+        'findDouble
+        '
+        Me.findDouble.Image = Global.HASHER.My.Resources.Resources.update
+        Me.findDouble.Name = "findDouble"
+        Me.findDouble.Size = New System.Drawing.Size(272, 22)
+        Me.findDouble.Text = "Поиск дубликатов"
+        '
+        'ClearDB
+        '
+        Me.ClearDB.Image = Global.HASHER.My.Resources.Resources.servnz
+        Me.ClearDB.Name = "ClearDB"
+        Me.ClearDB.ShortcutKeys = CType((System.Windows.Forms.Keys.Shift Or System.Windows.Forms.Keys.Delete), System.Windows.Forms.Keys)
+        Me.ClearDB.Size = New System.Drawing.Size(272, 22)
+        Me.ClearDB.Text = "Очистить базу данных"
+        '
+        'SetupPrg
+        '
+        Me.SetupPrg.Image = Global.HASHER.My.Resources.Resources.setup
+        Me.SetupPrg.Name = "SetupPrg"
+        Me.SetupPrg.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
+        Me.SetupPrg.Size = New System.Drawing.Size(272, 22)
+        Me.SetupPrg.Text = "Настройки"
+        '
+        'Exitmnu
+        '
+        Me.Exitmnu.Image = Global.HASHER.My.Resources.Resources._exit
+        Me.Exitmnu.Name = "Exitmnu"
+        Me.Exitmnu.ShortcutKeys = CType((System.Windows.Forms.Keys.Alt Or System.Windows.Forms.Keys.F4), System.Windows.Forms.Keys)
+        Me.Exitmnu.Size = New System.Drawing.Size(272, 22)
+        Me.Exitmnu.Text = "Выход"
+        '
+        'addFoldertoBranch
+        '
+        Me.addFoldertoBranch.Image = Global.HASHER.My.Resources.Resources.fadd
+        Me.addFoldertoBranch.Name = "addFoldertoBranch"
+        Me.addFoldertoBranch.Size = New System.Drawing.Size(281, 22)
+        Me.addFoldertoBranch.Text = "Добавить каталог"
+        '
+        'ДобавитьФайлToolStripMenuItem
+        '
+        Me.ДобавитьФайлToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.add
+        Me.ДобавитьФайлToolStripMenuItem.Name = "ДобавитьФайлToolStripMenuItem"
+        Me.ДобавитьФайлToolStripMenuItem.Size = New System.Drawing.Size(281, 22)
+        Me.ДобавитьФайлToolStripMenuItem.Text = "Добавить файл"
+        '
+        'RepAddBrToolStripMenuItem
+        '
+        Me.RepAddBrToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.ok
+        Me.RepAddBrToolStripMenuItem.Name = "RepAddBrToolStripMenuItem"
+        Me.RepAddBrToolStripMenuItem.Size = New System.Drawing.Size(281, 22)
+        Me.RepAddBrToolStripMenuItem.Text = "Принять изменения"
+        '
+        'addToIgnore
+        '
+        Me.addToIgnore.Image = Global.HASHER.My.Resources.Resources.editservice
+        Me.addToIgnore.Name = "addToIgnore"
+        Me.addToIgnore.Size = New System.Drawing.Size(281, 22)
+        Me.addToIgnore.Text = "Добавить тип файла в игнорируемые"
+        '
+        'UpdateData
+        '
+        Me.UpdateData.Image = Global.HASHER.My.Resources.Resources.pcupdate
+        Me.UpdateData.Name = "UpdateData"
+        Me.UpdateData.Size = New System.Drawing.Size(281, 22)
+        Me.UpdateData.Text = "Обновить данные"
+        '
+        'ПоискДубликатаToolStripMenuItem
+        '
+        Me.ПоискДубликатаToolStripMenuItem.Image = Global.HASHER.My.Resources.Resources.update
+        Me.ПоискДубликатаToolStripMenuItem.Name = "ПоискДубликатаToolStripMenuItem"
+        Me.ПоискДубликатаToolStripMenuItem.Size = New System.Drawing.Size(281, 22)
+        Me.ПоискДубликатаToolStripMenuItem.Text = "Поиск дубликата"
+        '
+        'FindNewFiles
+        '
+        Me.FindNewFiles.Image = Global.HASHER.My.Resources.Resources.updatefolder
+        Me.FindNewFiles.Name = "FindNewFiles"
+        Me.FindNewFiles.Size = New System.Drawing.Size(281, 22)
+        Me.FindNewFiles.Text = "Поиск новых файлов"
+        '
+        'mnuDeltoBranch
+        '
+        Me.mnuDeltoBranch.Image = Global.HASHER.My.Resources.Resources.remove
+        Me.mnuDeltoBranch.Name = "mnuDeltoBranch"
+        Me.mnuDeltoBranch.Size = New System.Drawing.Size(281, 22)
+        Me.mnuDeltoBranch.Text = "Удалить"
+        '
+        'ToolStripMenuItem1
+        '
+        Me.ToolStripMenuItem1.Image = Global.HASHER.My.Resources.Resources.delete
+        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(281, 22)
+        Me.ToolStripMenuItem1.Text = "Массовое удаление"
+        Me.ToolStripMenuItem1.Visible = False
+        '
+        'AllDeleteDB
+        '
+        Me.AllDeleteDB.Image = Global.HASHER.My.Resources.Resources.servnz
+        Me.AllDeleteDB.Name = "AllDeleteDB"
+        Me.AllDeleteDB.Size = New System.Drawing.Size(281, 22)
+        Me.AllDeleteDB.Text = "Полная очистка данных"
+        Me.AllDeleteDB.Visible = False
+        '
+        'M_exit
+        '
+        Me.M_exit.Image = Global.HASHER.My.Resources.Resources._exit
+        Me.M_exit.Name = "M_exit"
+        Me.M_exit.Size = New System.Drawing.Size(281, 22)
+        Me.M_exit.Text = "Выход"
+        '
         'НастройкиToolStripMenuItem1
         '
         Me.НастройкиToolStripMenuItem1.Image = Global.HASHER.My.Resources.Resources.setup
@@ -412,22 +447,12 @@ Partial Class MainForm
         Me.НастройкиToolStripMenuItem1.Size = New System.Drawing.Size(135, 22)
         Me.НастройкиToolStripMenuItem1.Text = "Настройки"
         '
-        'ToolStripMenuItem4
-        '
-        Me.ToolStripMenuItem4.Name = "ToolStripMenuItem4"
-        Me.ToolStripMenuItem4.Size = New System.Drawing.Size(132, 6)
-        '
         'ВыходToolStripMenuItem1
         '
         Me.ВыходToolStripMenuItem1.Image = Global.HASHER.My.Resources.Resources._exit
         Me.ВыходToolStripMenuItem1.Name = "ВыходToolStripMenuItem1"
         Me.ВыходToolStripMenuItem1.Size = New System.Drawing.Size(135, 22)
         Me.ВыходToolStripMenuItem1.Text = "Выход"
-        '
-        'pb1
-        '
-        Me.pb1.Name = "pb1"
-        Me.pb1.Size = New System.Drawing.Size(100, 16)
         '
         'MainForm
         '
@@ -499,4 +524,7 @@ Partial Class MainForm
     Friend WithEvents ПоискДубликатаToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents wbrTable As System.Windows.Forms.WebBrowser
     Friend WithEvents pb1 As System.Windows.Forms.ToolStripProgressBar
+    Friend WithEvents MnuScanDir As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents FindNewFiles As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents addToIgnore As System.Windows.Forms.ToolStripMenuItem
 End Class

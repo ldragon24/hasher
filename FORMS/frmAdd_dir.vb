@@ -1,20 +1,22 @@
-﻿Public Class frmAdd_type
+﻿Imports System.IO
+
+Public Class frmAdd_dir
     Private MassDel As Boolean = False
     Private rCOUNT As Integer = 0
     Private sSID As Integer
     Private sTXTtmp As String
 
-    Private Sub frmAdd_type_Load(sender As Object, e As EventArgs) Handles Me.Load
+    Private Sub frmAdd_dir_Load(sender As Object, e As EventArgs) Handles Me.Load
 
         lvFiles.Columns.Add(("id"), 20, HorizontalAlignment.Left)
-        lvFiles.Columns.Add(("Тип файла"), 100, HorizontalAlignment.Left)
+        lvFiles.Columns.Add(("Каталог"), 100, HorizontalAlignment.Left)
 
         Dim sSQL As String
         Dim sCOUNT As Integer
 
         Try
 
-            sSQL = "SELECT count(*) as t_n FROM TBL_IGNORE"
+            sSQL = "SELECT count(*) as t_n FROM TBL_DIR"
 
             Dim rs As Recordset
             rs = New Recordset
@@ -43,33 +45,6 @@
 
     End Sub
 
-    Private Sub DELETE_TYPE(Optional ByVal ssid As Integer = 0)
-        Dim z As Integer
-
-        If ssid = 0 Then
-
-            For z = 0 To lvFiles.SelectedItems.Count - 1
-                rCOUNT = (lvFiles.SelectedItems(z).Text)
-            Next
-
-            ssid = rCOUNT
-
-        End If
-
-        Dim sSQL As String
-        'Dim cmd As OleDbCommand
-        'Dim dr As OleDbDataReader
-
-        sSQL = "Delete * FROM TBL_IGNORE where id =" & ssid
-
-        DB7.Execute(sSQL)
-
-        'cmd = New OleDbCommand(sSQL, DB8)
-        'dr = cmd.ExecuteReader
-        'dr = Nothing
-
-    End Sub
-
     Private Sub LoadData()
 
         Dim intcount As Integer
@@ -80,7 +55,7 @@
 
         Try
 
-            sSQL = "SELECT count(*) as t_n FROM TBL_IGNORE"
+            sSQL = "SELECT count(*) as t_n FROM TBL_DIR"
 
             Dim rs As Recordset
             rs = New Recordset
@@ -100,7 +75,7 @@
 
                     lvFiles.Items.Clear()
 
-                    sSQL = "SELECT * FROM TBL_IGNORE"
+                    sSQL = "SELECT * FROM TBL_DIR"
                     rs = New Recordset
                     rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
 
@@ -110,7 +85,7 @@
 
 
                             lvFiles.Items.Add(.Fields("id").Value)
-                            lvFiles.Items(intcount).SubItems.Add(.Fields("type").Value)
+                            lvFiles.Items(intcount).SubItems.Add(.Fields("dir").Value)
 
                             intcount = intcount + 1
                             .MoveNext()
@@ -128,8 +103,29 @@
 
     End Sub
 
-    Private Sub ToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem1.Click
+    Private Sub DELETE_TYPE(Optional ByVal ssid As Integer = 0)
+        Dim z As Integer
 
+        If ssid = 0 Then
+
+            For z = 0 To lvFiles.SelectedItems.Count - 1
+                rCOUNT = (lvFiles.SelectedItems(z).Text)
+            Next
+
+            ssid = rCOUNT
+
+        End If
+
+        Dim sSQL As String
+
+        sSQL = "Delete * FROM TBL_DIR where id =" & ssid
+
+        DB7.Execute(sSQL)
+
+
+    End Sub
+
+    Private Sub ToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem1.Click
         If MassDel = False Then
             lvFiles.CheckBoxes = True
             lvFiles.MultiSelect = True
@@ -142,7 +138,6 @@
             lvFiles.MultiSelect = False
             MassDel = False
         End If
-
     End Sub
 
     Private Sub mnuDeltoBranch_Click(sender As Object, e As EventArgs) Handles mnuDeltoBranch.Click
@@ -210,8 +205,6 @@
     End Sub
 
     Private Sub lvFiles_DoubleClick(sender As Object, e As EventArgs) Handles lvFiles.DoubleClick
-        'NotesLoaded(lvNotesOTH, NotesOTHdate, cmbNotesOTHMaster, txtNotesOTH, btnOTHAdd)
-
         Try
             If lvFiles.Items.Count = 0 Then Exit Sub
 
@@ -224,14 +217,14 @@
             Dim rs As Recordset
             rs = New Recordset
 
-            rs.Open("SELECT type FROM TBL_IGNORE WHERE id=" & rCOUNT, DB7, CursorTypeEnum.adOpenDynamic,
+            rs.Open("SELECT dir FROM TBL_DIR WHERE id=" & rCOUNT, DB7, CursorTypeEnum.adOpenDynamic,
                     LockTypeEnum.adLockOptimistic)
 
             With rs
 
-                If Not IsDBNull(.Fields("type").Value) Then txtType.Text = .Fields("type").Value
+                If Not IsDBNull(.Fields("dir").Value) Then txtType.Text = .Fields("dir").Value
 
-                sTXTtmp = .Fields("type").Value
+                sTXTtmp = .Fields("dir").Value
 
             End With
 
@@ -243,10 +236,9 @@
         Catch ex As Exception
             MsgBox(ex.Message, MsgBoxStyle.Critical)
         End Try
-
     End Sub
 
-    Private Sub lvFiles_MouseUp(sender As Object, e As MouseEventArgs) Handles lvFiles.MouseUp
+    Private Sub lvFiles_Mouseup(sender As Object, e As MouseEventArgs) Handles lvFiles.MouseUp
         Try
             If lvFiles.Items.Count = 0 Then Exit Sub
 
@@ -270,6 +262,7 @@
         End Try
     End Sub
 
+   
     Private Sub lvFiles_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lvFiles.SelectedIndexChanged
         If lvFiles.Items.Count = 0 Then Exit Sub
 
@@ -278,12 +271,40 @@
         For z = 0 To lvFiles.SelectedItems.Count - 1
             rCOUNT = (lvFiles.SelectedItems(z).Text)
         Next
-
     End Sub
 
     Private Sub btnAdd_Click(sender As Object, e As EventArgs) Handles btnAdd.Click
 
-        If Len(txtType.Text) = 0 Then Exit Sub
+        If Len(txtType.Text) = 0 Then
+
+            Try
+
+                Dim DirectoryBrowser As New FolderBrowserDialog
+
+                With DirectoryBrowser
+
+                    .RootFolder = Environment.SpecialFolder.Desktop
+
+                    .SelectedPath = Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\"
+                    .Description = "Выбор директории для загрузки данных"
+
+                    If .ShowDialog = DialogResult.OK Then
+                        ' BasePath = .SelectedPath
+                        txtType.Text = .SelectedPath
+                    Else
+                        Exit Sub
+
+                    End If
+
+                End With
+
+            Catch ex As Exception
+
+                MsgBox(ex.Message)
+
+            End Try
+
+        End If
 
         Try
 
@@ -293,10 +314,10 @@
 
                 Case "Сохранить"
 
-                    sSQL = "UPDATE TBL_IGNORE SET type='" & txtType.Text & "' WHERE id =" & rCOUNT
+                    sSQL = "UPDATE TBL_DIR SET dir='" & txtType.Text & "' WHERE id =" & rCOUNT
                     DB7.Execute(sSQL)
 
-                    MainForm.AddLogEntr("Изменен игнорируемый тип файла c : " & sTXTtmp & " на " & txtType.Text, 2)
+                    MainForm.AddLogEntr("Изменен каталог c : " & sTXTtmp & " на " & txtType.Text, 2)
                     sTXTtmp = ""
                     txtType.Text = ""
                     btnAdd.Text = "Добавить"
@@ -305,10 +326,10 @@
 
                     If Not RSExistsType(txtType.Text) Then
 
-                        sSQL = "INSERT INTO [TBL_IGNORE]([type]) VALUES('" & txtType.Text & "')"
+                        sSQL = "INSERT INTO [TBL_DIR]([dir]) VALUES('" & txtType.Text & "')"
                         DB7.Execute(sSQL)
 
-                        MainForm.AddLogEntr("Добавлен игнорируемый тип файла: " & txtType.Text, 2)
+                        MainForm.AddLogEntr("Добавлен каталог: " & txtType.Text, 2)
 
                         txtType.Text = ""
                         btnAdd.Text = "Добавить"
@@ -321,7 +342,6 @@
         End Try
 
         Call LoadData()
-
     End Sub
 
     Public Function RSExistsType(ByVal sGroupName As String) As Boolean
@@ -333,7 +353,7 @@
         sGroupName = Replace(sGroupName, "'", " ")
         If Len(sGroupName) = 0 Then Exit Function
 
-        sSQL = "SELECT COUNT(*) AS t_n FROM TBL_IGNORE WHERE type='" & sGroupName & "'"
+        sSQL = "SELECT COUNT(*) AS t_n FROM TBL_DIR WHERE dir='" & sGroupName & "'"
 
         Dim rs As Recordset
         rs = New Recordset
@@ -360,5 +380,4 @@
 Error_:
         RSExistsType = False
     End Function
-
 End Class

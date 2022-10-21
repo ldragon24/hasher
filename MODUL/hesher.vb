@@ -74,6 +74,27 @@ Module hasher
 
     End Function
 
+    Public Function GetSHA384(ByVal sfile As String) As String
+
+        Dim stmp As String
+        Try
+            Using _sha384 As New System.Security.Cryptography.SHA384CryptoServiceProvider
+
+                Using stream = File.OpenRead(sfile)
+                    Dim hash2 = _sha384.ComputeHash(stream)
+                    stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
+
+                End Using
+            End Using
+
+        Catch ex As Exception
+            Trace.WriteLine(Err.Description)
+        End Try
+
+        Return stmp
+
+    End Function
+
     Public Function GetSHA1(ByVal sfile As String) As String
 
         Using fs As FileStream = File.OpenRead(sfile)

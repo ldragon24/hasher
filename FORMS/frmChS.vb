@@ -200,4 +200,8 @@
     Private Sub rbSHA512_CheckedChanged(sender As Object, e As EventArgs) Handles rbSHA512.CheckedChanged
         MainForm.typeCRC = "SHA512"
     End Sub
+
+    Private Sub btnDirectory_Click(sender As Object, e As EventArgs) Handles btnDirectory.Click
+        frmAdd_dir.ShowDialog(Me)
+    End Sub
 End Class

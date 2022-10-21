@@ -29,6 +29,7 @@ Partial Class frmChS
         Me.rbSHA256 = New System.Windows.Forms.RadioButton()
         Me.rbSHA1 = New System.Windows.Forms.RadioButton()
         Me.rbSHA512 = New System.Windows.Forms.RadioButton()
+        Me.btnDirectory = New System.Windows.Forms.Button()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -39,19 +40,21 @@ Partial Class frmChS
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.rbMD5, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.rbCRC32, 0, 1)
-        Me.TableLayoutPanel1.Controls.Add(Me.btnSave, 1, 3)
         Me.TableLayoutPanel1.Controls.Add(Me.rbSHA256, 1, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.rbSHA1, 1, 1)
         Me.TableLayoutPanel1.Controls.Add(Me.rbSHA512, 0, 3)
+        Me.TableLayoutPanel1.Controls.Add(Me.btnSave, 1, 4)
+        Me.TableLayoutPanel1.Controls.Add(Me.btnDirectory, 0, 4)
         Me.TableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TableLayoutPanel1.Location = New System.Drawing.Point(0, 0)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
-        Me.TableLayoutPanel1.RowCount = 4
+        Me.TableLayoutPanel1.RowCount = 5
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle())
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20.0!))
-        Me.TableLayoutPanel1.Size = New System.Drawing.Size(329, 76)
+        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31.0!))
+        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 12.0!))
+        Me.TableLayoutPanel1.Size = New System.Drawing.Size(329, 112)
         Me.TableLayoutPanel1.TabIndex = 0
         '
         'rbMD5
@@ -79,9 +82,9 @@ Partial Class frmChS
         'btnSave
         '
         Me.btnSave.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnSave.Location = New System.Drawing.Point(251, 49)
+        Me.btnSave.Location = New System.Drawing.Point(167, 80)
         Me.btnSave.Name = "btnSave"
-        Me.btnSave.Size = New System.Drawing.Size(75, 23)
+        Me.btnSave.Size = New System.Drawing.Size(159, 23)
         Me.btnSave.TabIndex = 3
         Me.btnSave.Text = "Сохранить"
         Me.btnSave.UseVisualStyleBackColor = True
@@ -119,11 +122,21 @@ Partial Class frmChS
         Me.rbSHA512.Text = "SHA-512"
         Me.rbSHA512.UseVisualStyleBackColor = True
         '
+        'btnDirectory
+        '
+        Me.btnDirectory.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnDirectory.Location = New System.Drawing.Point(3, 80)
+        Me.btnDirectory.Name = "btnDirectory"
+        Me.btnDirectory.Size = New System.Drawing.Size(158, 23)
+        Me.btnDirectory.TabIndex = 6
+        Me.btnDirectory.Text = "Каталоги для контроля"
+        Me.btnDirectory.UseVisualStyleBackColor = True
+        '
         'frmChS
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(329, 76)
+        Me.ClientSize = New System.Drawing.Size(329, 112)
         Me.Controls.Add(Me.TableLayoutPanel1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
         Me.Name = "frmChS"
@@ -141,4 +154,5 @@ Partial Class frmChS
     Friend WithEvents btnSave As System.Windows.Forms.Button
     Friend WithEvents rbSHA1 As System.Windows.Forms.RadioButton
     Friend WithEvents rbSHA512 As System.Windows.Forms.RadioButton
+    Friend WithEvents btnDirectory As System.Windows.Forms.Button
 End Class
