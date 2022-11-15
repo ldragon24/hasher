@@ -29,35 +29,41 @@ Partial Class frmAdd_dir
         Me.cmBmenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.mnuDeltoBranch = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
         Me.cmBmenu.SuspendLayout()
+        Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
         'lvFiles
         '
+        Me.TableLayoutPanel1.SetColumnSpan(Me.lvFiles, 2)
+        Me.lvFiles.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvFiles.FullRowSelect = True
         Me.lvFiles.GridLines = True
-        Me.lvFiles.Location = New System.Drawing.Point(4, 30)
+        Me.lvFiles.Location = New System.Drawing.Point(3, 32)
         Me.lvFiles.MultiSelect = False
         Me.lvFiles.Name = "lvFiles"
-        Me.lvFiles.Size = New System.Drawing.Size(410, 433)
+        Me.lvFiles.Size = New System.Drawing.Size(447, 452)
         Me.lvFiles.TabIndex = 6
         Me.lvFiles.UseCompatibleStateImageBehavior = False
         Me.lvFiles.View = System.Windows.Forms.View.Details
         '
         'btnAdd
         '
-        Me.btnAdd.Location = New System.Drawing.Point(341, 3)
+        Me.btnAdd.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnAdd.Location = New System.Drawing.Point(396, 3)
         Me.btnAdd.Name = "btnAdd"
-        Me.btnAdd.Size = New System.Drawing.Size(75, 23)
+        Me.btnAdd.Size = New System.Drawing.Size(54, 23)
         Me.btnAdd.TabIndex = 5
         Me.btnAdd.Text = "&Добавить"
         Me.btnAdd.UseVisualStyleBackColor = True
         '
         'txtType
         '
-        Me.txtType.Location = New System.Drawing.Point(4, 4)
+        Me.txtType.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.txtType.Location = New System.Drawing.Point(3, 3)
         Me.txtType.Name = "txtType"
-        Me.txtType.Size = New System.Drawing.Size(333, 20)
+        Me.txtType.Size = New System.Drawing.Size(387, 20)
         Me.txtType.TabIndex = 4
         '
         'cmBmenu
@@ -80,21 +86,37 @@ Partial Class frmAdd_dir
         Me.ToolStripMenuItem1.Size = New System.Drawing.Size(183, 22)
         Me.ToolStripMenuItem1.Text = "Массовое удаление"
         '
+        'TableLayoutPanel1
+        '
+        Me.TableLayoutPanel1.ColumnCount = 2
+        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 60.0!))
+        Me.TableLayoutPanel1.Controls.Add(Me.txtType, 0, 0)
+        Me.TableLayoutPanel1.Controls.Add(Me.btnAdd, 1, 0)
+        Me.TableLayoutPanel1.Controls.Add(Me.lvFiles, 0, 1)
+        Me.TableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TableLayoutPanel1.Location = New System.Drawing.Point(0, 0)
+        Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
+        Me.TableLayoutPanel1.RowCount = 2
+        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle())
+        Me.TableLayoutPanel1.Size = New System.Drawing.Size(453, 487)
+        Me.TableLayoutPanel1.TabIndex = 7
+        '
         'frmAdd_dir
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(418, 465)
-        Me.Controls.Add(Me.lvFiles)
-        Me.Controls.Add(Me.btnAdd)
-        Me.Controls.Add(Me.txtType)
+        Me.ClientSize = New System.Drawing.Size(453, 487)
+        Me.Controls.Add(Me.TableLayoutPanel1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow
         Me.Name = "frmAdd_dir"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Добавление каталогов для контроля"
         Me.cmBmenu.ResumeLayout(False)
+        Me.TableLayoutPanel1.ResumeLayout(False)
+        Me.TableLayoutPanel1.PerformLayout()
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
     Friend WithEvents lvFiles As System.Windows.Forms.ListView
@@ -103,4 +125,5 @@ Partial Class frmAdd_dir
     Friend WithEvents cmBmenu As System.Windows.Forms.ContextMenuStrip
     Friend WithEvents mnuDeltoBranch As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem1 As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents TableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
 End Class

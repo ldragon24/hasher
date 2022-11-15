@@ -13,7 +13,6 @@ Module hasher
         Dim hash = MD5.Create()
         Dim hashValue() As Byte
 
-
         Dim fileStream As FileStream = File.OpenRead(theInput)
         fileStream.Position = 0
         hashValue = hash.ComputeHash(fileStream)
@@ -41,15 +40,16 @@ Module hasher
                 Using stream = File.OpenRead(sfile)
                     Dim hash2 = _sha512.ComputeHash(stream)
                     stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
+                    'Trace.WriteLine(String.Format("{0}", stmp))
+                    Return stmp
 
                 End Using
             End Using
 
         Catch ex As Exception
             Trace.WriteLine(Err.Description)
+            Return stmp
         End Try
-
-        Return stmp
 
     End Function
 
@@ -62,36 +62,34 @@ Module hasher
                 Using stream = File.OpenRead(sfile)
                     Dim hash2 = _sha512.ComputeHash(stream)
                     stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
-
+                    ' Trace.WriteLine(String.Format("{0}", stmp))
+                    Return stmp
                 End Using
             End Using
 
         Catch ex As Exception
             Trace.WriteLine(Err.Description)
+            Return stmp
         End Try
-
-        Return stmp
 
     End Function
 
-    Public Function GetSHA384(ByVal sfile As String) As String
+    Public Function GetSha384Hash(ByVal sfile As String) As String
+        Dim _result$ = ""
 
-        Dim stmp As String
         Try
-            Using _sha384 As New System.Security.Cryptography.SHA384CryptoServiceProvider
-
+            Using _sha512 As New System.Security.Cryptography.SHA384CryptoServiceProvider
                 Using stream = File.OpenRead(sfile)
-                    Dim hash2 = _sha384.ComputeHash(stream)
-                    stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
-
+                    Dim _hash = _sha512.ComputeHash(stream)
+                    _result$ = BitConverter.ToString(_hash).Replace("-", String.Empty)
+                    ' Trace.WriteLine(String.Format("{0}", _result$))
+                    Return _result$
                 End Using
             End Using
-
         Catch ex As Exception
             Trace.WriteLine(Err.Description)
+            Return _result$
         End Try
-
-        Return stmp
 
     End Function
 
@@ -99,8 +97,29 @@ Module hasher
 
         Using fs As FileStream = File.OpenRead(sfile)
             Dim sha As SHA1 = New SHA1Managed()
-            Return BitConverter.ToString(sha.ComputeHash(fs))
+            Return BitConverter.ToString(sha.ComputeHash(fs)).Replace("-", String.Empty)
         End Using
+
+    End Function
+
+    Public Function GetStribog(ByVal sfile As String) As String
+
+        Dim gst As GOST2 = New GOST2(512)
+        Dim gst512 As String
+
+        Using fs = File.OpenRead(sfile)
+            Dim fileData = New Byte(fs.Length - 1) {}
+            fs.Read(fileData, 0, fs.Length)
+            Dim checkSum As Byte() = gst.GetHashGOST(fileData)
+            gst512 = BitConverter.ToString(checkSum)
+            Return gst512
+        End Using
+
+    End Function
+
+    Public Function GetSHA224(ByVal sfile As String) As String
+
+        Return SHA224.SHA224(sfile)
 
     End Function
 
@@ -143,110 +162,28 @@ Module hasher
         End Try
     End Function
 
-    Public Function GetGOST(ByVal sFileName As Byte()) As String
-        'Dim G As GOST = New GOST(256)
-        'Dim G512 As GOST = New GOST(512)
-        'Dim message As Byte() = {&H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30, &H39, &H38, &H37, &H36, &H35, &H34, &H33, &H32, &H31, &H30}
+    'Public Function GetGOST(inputStream As String) As String
 
+    '    Dim gh = New GOST()
+    '    Dim bin = File.ReadAllBytes(inputStream)
 
-        'Dim res As Byte() = G.GetHashGost(sFileName)
-        'Dim res2 As Byte() = G512.GetHashGost(sFileName)
-        'Dim h256 = BitConverter.ToString(res)
-        'Dim h512 = BitConverter.ToString(res2)
+    '    Return (gh.ComputeHash(bin))
 
-        'Return h512
+    'End Function
 
-    End Function
+    'Public Function GetMagMa(inputStream As String)
 
-    Public Function ReadFileC(ByVal sFileName As String) As String
+    '    Dim gh = New MagmaProvider()
 
-        Dim Sigma As Byte()
+    '    Return (gh.OFBEncrypt(File.ReadAllBytes(inputStream), 66467))
 
-        Using fs As FileStream = New FileStream(sFileName, FileMode.Open, FileAccess.Read)
+    'End Function
 
-            Using br As BinaryReader = New BinaryReader(fs, New ASCIIEncoding())
-                Dim chunk As Byte()
-
-                chunk = br.ReadBytes(CHUNK_SIZE)
-
-                While chunk.Length > 0
-
-                    Select Case Len(sTEXT)
-
-                        Case 0
-                            sTEXT = GetGOST(Encoding.ASCII.GetBytes(chunk.ToString()))
-                        Case Else
-                            sTEXT = sTEXT + "-" + GetGOST(Encoding.ASCII.GetBytes(chunk.ToString()))
-                    End Select
-
-                    ' DumpBytes(chunk, chunk.Length)
-                    chunk = br.ReadBytes(CHUNK_SIZE)
-
-                End While
-
-            End Using
-        End Using
-
-        'sTmp = sTEXT
-
-
-
-        'нужно разбить существующую строку с хэщем на производные и делать это до предела, т.е. до того пока строка не будет 64 байта
-        'Работает медленно, использовать нецелесообразно
-
-
-
-
-        Return sTEXT
-
-    End Function
 
     Public Function StrToByteArray(ByVal str As String) As Byte()
 
         Dim encoding As New System.Text.UTF8Encoding()
         Return encoding.GetBytes(str)
-
-    End Function
-
-    Public Function DumpBytes(ByVal bdata As Byte(), ByVal len As Integer)
-
-        Dim i As Integer
-        Dim j = 0
-        Dim dchar As Char
-        ' 3 * 16 chars for hex display, 16 chars for text and 8 chars
-        ' for the 'gutter' int the middle.
-        Dim dumptext As StringBuilder = New StringBuilder("        ", 16 * 4 + 8)
-        For i = 0 To len - 1
-            dumptext.Insert(j * 3, String.Format("{0:X2} ", CInt(bdata(i))))
-            dchar = Microsoft.VisualBasic.ChrW(bdata(i))
-            '' replace 'non-printable' chars with a '.'.
-            If Char.IsWhiteSpace(dchar) OrElse Char.IsControl(dchar) Then
-                dchar = "."c
-            End If
-            dumptext.Append(dchar)
-            j += 1
-
-            If j = 16 Then
-
-                sTEXT = sTEXT + GetGOST(Encoding.ASCII.GetBytes(dumptext.ToString()))
-
-                dumptext.Length = 0
-                dumptext.Append("        ")
-                j = 0
-            End If
-        Next
-        ' display the remaining line
-
-        If j > 0 Then
-            For i = j To 15
-                dumptext.Insert(j * 3, "   ")
-            Next
-
-            sTEXT = sTEXT + GetGOST(Encoding.ASCII.GetBytes(dumptext.ToString()))
-
-        End If
-
-        Return sTEXT
 
     End Function
 
@@ -279,6 +216,10 @@ Module hasher
 
         Return _Buffer
     End Function
+
+    Private Sub StribogChaeckSumm()
+        Throw New NotImplementedException
+    End Sub
 
 
 End Module

@@ -6,6 +6,7 @@
 
     Private Sub frmAdd_type_Load(sender As Object, e As EventArgs) Handles Me.Load
 
+        lvFiles.Columns.Clear()
         lvFiles.Columns.Add(("id"), 20, HorizontalAlignment.Left)
         lvFiles.Columns.Add(("Тип файла"), 100, HorizontalAlignment.Left)
 
@@ -39,7 +40,6 @@
         Catch ex As Exception
 
         End Try
-
 
     End Sub
 
@@ -361,4 +361,14 @@ Error_:
         RSExistsType = False
     End Function
 
+    Private Sub frmAdd_type_Resize(sender As Object, e As EventArgs) Handles Me.Resize
+        '453; 516
+        If Me.Width > 453 Then Me.Width = 453
+        If Me.Height > 516 Then Me.Height = 516
+
+        If Me.Width < 453 Then Me.Width = 453
+        If Me.Height < 516 Then Me.Height = 516
+
+
+    End Sub
 End Class

@@ -1,6 +1,12 @@
 ﻿Imports System.IO
 Imports System.Threading
 
+Imports System.Collections
+Imports System.Management
+Imports System.ComponentModel
+Imports System.Text
+Imports Ionic.Zip
+
 Public Class MainForm
 
     Private MassDel As Boolean = False
@@ -8,6 +14,7 @@ Public Class MainForm
     Private rCOUNT As Integer
     Private Const CP_NOCLOSE_BUTTON As Integer = &H200
     Public typeCRC As String
+    Public LOG_EVT As Boolean = False
 
     Public ThrTIMER_ As System.Threading.Thread
 
@@ -52,6 +59,7 @@ Public Class MainForm
                     rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
                     With rs
                         typeCRC = .Fields("type").Value
+                        LOG_EVT = .Fields("EVT").Value
                     End With
                     rs.Close()
                     rs = Nothing
@@ -61,7 +69,7 @@ Public Class MainForm
                     sSQL = "DELETE * FROM TBL_CONF"
                     DB7.Execute(sSQL)
 
-                    sSQL = "INSERT INTO [TBL_CONF]([type],[vers]) VALUES('MD5','1')"
+                    sSQL = "INSERT INTO [TBL_CONF]([type],[vers],[EVT]) VALUES('MD5','1','0')"
                     DB7.Execute(sSQL)
 
 
@@ -93,7 +101,7 @@ Public Class MainForm
         lvFiles.Columns.Add(("id"), 20, HorizontalAlignment.Left)
         lvFiles.Columns.Add(("Имя файла"), 100, HorizontalAlignment.Left)
         lvFiles.Columns.Add(("Контрольная сумма"), 100, HorizontalAlignment.Left)
-        lvFiles.Columns.Add(("Проверка"), 30, HorizontalAlignment.Left)
+        lvFiles.Columns.Add(("Соответствие эталону"), 30, HorizontalAlignment.Left)
         lvFiles.Columns.Add(("Дата"), 30, HorizontalAlignment.Left)
         'lvFiles.Columns.Add(("Размер файла"), 30, HorizontalAlignment.Left)
 
@@ -107,16 +115,15 @@ Public Class MainForm
         lvFilesF.Columns.Add(("Имя файла"), 100, HorizontalAlignment.Left)
         lvFilesF.Columns.Add(("Контрольная сумма"), 100, HorizontalAlignment.Left)
 
-
-        Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
-
-        ' Application.DoEvents()
-
         Call typeCRCLoad()
-
+        ' Application.DoEvents()
 
         ThrTIMER_ = New System.Threading.Thread(AddressOf ThrTIMER)
         ThrTIMER_.Start()
+
+        'Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+        Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+
 
     End Sub
 
@@ -310,6 +317,7 @@ Public Class MainForm
                 lvFiles.Items.Add(lvFiles.Items.Count + 1)
                 lvFiles.Items(intcount).SubItems.Add(dir)
 
+
                 Select Case typeCRC
 
                     Case "MD5"
@@ -331,9 +339,13 @@ Public Class MainForm
 
                         thisHash = GetSHA1(dir)
 
+                    Case "Sha384"
+
+                        thisHash = GetSha384Hash(dir)
+
                     Case "GOST"
 
-                        ' thisHash = GetGOST(FileToByteArray(dir))
+                        thisHash = GetStribog(dir)
 
                     Case Else
 
@@ -377,7 +389,7 @@ Public Class MainForm
 
         Next
 
-      
+
         ResList(lvFiles)
         'End Try
 
@@ -451,6 +463,7 @@ Public Class MainForm
 
                         'typeCRC = "GOST"
 
+
                         Select Case typeCRC
 
                             Case "MD5"
@@ -473,12 +486,21 @@ Public Class MainForm
 
                                 newHash = GetSHA512(.Fields("file").Value)
 
+                            Case "Sha384"
+
+                                newHash = GetSha384Hash(.Fields("file").Value)
+
                             Case "GOST"
+                                '
+                                newHash = GetStribog(.Fields("file").Value)
 
+                            Case "MAGMA"
 
-                                '  newHash = GetGOST(FileToByteArray(.Fields("file").Value))
-                                'newHash = ReadFileC(.Fields("file").Value)
+                                'newHash = GetMagMa(.Fields("file").Value)
 
+                            Case "SHA224"
+
+                                newHash = GetSHA224(.Fields("file").Value)
 
                             Case Else
 
@@ -490,7 +512,7 @@ Public Class MainForm
 
                         If .Fields("hash").Value = newHash Then
 
-                            lvFiles.Items(intcount).SubItems.Add("Ok")
+                            lvFiles.Items(intcount).SubItems.Add("Соответствует")
 
                         Else
                             sChange = True
@@ -504,7 +526,7 @@ Public Class MainForm
                             'Если хэш не соответствует то
 
 
-                            lvFiles.Items(intcount).SubItems.Add("No")
+                            lvFiles.Items(intcount).SubItems.Add("Не соответствует")
 
                             lvFiles.Items(CInt(intcount)).ForeColor = Color.Cyan
                             lvFiles.Items(CInt(intcount)).BackColor = Color.Red
@@ -669,7 +691,7 @@ Public Class MainForm
 
             Select Case lvFiles.SelectedItems(intj).SubItems(3).Text
 
-                Case "No"
+                Case "Не соответствует"
                     RepAddBrToolStripMenuItem.Enabled = True
                 Case Else
 
@@ -874,6 +896,14 @@ Public Class MainForm
 
                     newHash = GetSHA1(lvFiles.SelectedItems(intj).SubItems(1).Text)
 
+                Case "Sha384"
+
+                    newHash = GetSha384Hash(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+                Case "GOST"
+
+                    newHash = GetStribog(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
                 Case Else
 
                     MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
@@ -882,54 +912,32 @@ Public Class MainForm
 
             End Select
 
+
+            lvFiles.SelectedItems(intj).SubItems(2).Text = newHash
+            lvFiles.SelectedItems(intj).SubItems(3).Text = "Соответствует"
+            lvFiles.SelectedItems(intj).SubItems(4).Text = DateAndTime.Now.ToString
+            lvFiles.SelectedItems(CInt(intj)).ForeColor = Color.Black
+            lvFiles.SelectedItems(CInt(intj)).BackColor = Color.White
+
+
+
             Dim sSQL As String
-            ' sSQL = "UPDATE [TBL_HASH] SET [hash]=@item1,[dttm]=@item2 WHERE id=@id"
-
-            'Dim cmdInsert As New OleDbCommand
-            'Dim query As String = sSQL
-            'Dim iSqlStatus As Integer
-
-            'cmdInsert.Parameters.Clear()
 
             Try
-
-                'sSQL = "UPDATE [TBL_HASH] SET [hash]=@item1,[dttm]=@item2 WHERE id=@id"
 
                 sSQL = "UPDATE TBL_HASH SET hash='" & newHash & "', dttm='" & DateAndTime.Now.ToString & "' WHERE id =" & rCOUNT
                 DB7.Execute(sSQL)
 
                 AddLogEntr("Записана новая контрольная сумма для файла: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Контрольная сумма: " & newHash & vbCrLf & "Старая контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
 
-                'With cmdInsert
-
-                '    .CommandText = sSQL
-                '    .CommandType = CommandType.Text
-                '    .Parameters.AddWithValue("@value1", newHash)
-                '    'de6f77bd304e63d98592218630a12633
-                '    .Parameters.AddWithValue("@value2", DateAndTime.Now.ToString)
-
-                '    .Parameters.AddWithValue("@id", rCOUNT)
-
-                '    .Connection = DB8
-                'End With
-
-                ''HandleConnection(DB8)
-
-                'iSqlStatus = cmdInsert.ExecuteNonQuery
-
-                'If Not iSqlStatus = 0 Then
-                '    'Return False
-                'Else
-                '    'Return True
-                'End If
             Catch ex As Exception
                 MsgBox(ex.Message)
             Finally
 
-                'HandleConnection(DB8)
             End Try
 
-            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+            '
+            ' Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
         End If
 
@@ -1224,11 +1232,8 @@ Public Class MainForm
     End Sub
 
     Sub ThrTIMER()
-        Dim SDA As DateTime
 
         Do
-
-            SDA = Date.Today.AddDays(-7)
 
             Select Case TimeOfDay.Hour
 
@@ -1239,7 +1244,8 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                    'Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
                             End Select
                     End Select
@@ -1251,7 +1257,7 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
                             End Select
                     End Select
@@ -1263,7 +1269,7 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
                             End Select
                     End Select
@@ -1275,7 +1281,7 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
                             End Select
                     End Select
@@ -1287,7 +1293,7 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
                             End Select
                     End Select
@@ -1299,7 +1305,7 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
                             End Select
                     End Select
@@ -1311,7 +1317,7 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
                             End Select
                     End Select
@@ -1323,10 +1329,31 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
                             End Select
                     End Select
+
+                    'Сохранение журналов операционной системы
+                Case 23
+
+                    Select Case TimeOfDay.Minute
+                        Case 52
+                            Select Case TimeOfDay.Second
+                                Case 45
+
+                                    Select Case LOG_EVT
+
+                                        Case True
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Save_LOG_EVT))
+                                        Case Else
+
+                                    End Select
+
+                            End Select
+                    End Select
+
+
 
             End Select
 
@@ -1446,6 +1473,14 @@ Public Class MainForm
 
                     Case "SHA1"
                         thisHash = GetSHA1(fdlg.FileName)
+
+                    Case "Sha384"
+
+                        thisHash = GetSha384Hash(fdlg.FileName)
+
+                    Case "GOST"
+
+                        thisHash = GetStribog(fdlg.FileName)
 
                     Case Else
                         MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
@@ -1582,33 +1617,6 @@ Public Class MainForm
 
                     If Not File_ignore(dir) Then
 
-                        Select Case typeCRC
-
-                            Case "MD5"
-                                thisHash = GetHash(dir)
-
-                            Case "Crc32"
-
-                                thisHash = GetCRC32(dir)
-
-                            Case "SHA256"
-
-                                thisHash = GetSHA256(dir)
-
-                            Case "SHA512"
-
-                                thisHash = GetSHA512(dir)
-
-                            Case "SHA1"
-
-                                thisHash = GetSHA1(dir)
-
-                            Case "GOST"
-
-                            Case Else
-
-                        End Select
-
                         sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
 
                         Dim rs1 As Recordset
@@ -1622,17 +1630,44 @@ Public Class MainForm
                         rs1 = Nothing
 
                         Select Case sCOUNT
-
                             Case 0
                                 'ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
                             Case Else
 
                                 If Not RSExistsHash(dir) Then
+
+                                    Select Case typeCRC
+                                        Case "MD5"
+                                            thisHash = GetHash(dir)
+                                        Case "Crc32"
+                                            thisHash = GetCRC32(dir)
+                                        Case "SHA256"
+                                            thisHash = GetSHA256(dir)
+                                        Case "SHA512"
+                                            thisHash = GetSHA512(dir)
+                                        Case "SHA1"
+                                            thisHash = GetSHA1(dir)
+                                        Case "Sha384"
+
+                                            thisHash = GetSha384Hash(dir)
+
+                                        Case "GOST"
+                                            ' thisHash = GetGOST(dir)
+                                            thisHash = GetStribog(dir)
+
+                                        Case Else
+                                    End Select
+
                                     ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
+
+                                    Dim d = Now
+                                    IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Найден новый файл: " & "|" & dir & "|" & " Контрольная сумма: " & "|" & thisHash & vbNewLine, System.Text.Encoding.Default)
+                                    '############################################
+
+                                    AddLogEntr("Найден новый файл: " & dir & vbCrLf & " Контрольная сумма: " & thisHash, 1)
+
                                 End If
-
                         End Select
-
                         intcount = intcount + 1
                     End If
 
@@ -1704,8 +1739,107 @@ Public Class MainForm
 
         End Try
 
-        
+
 
 
     End Sub
+
+    '###########################################################################################################
+    'Блок для работы с системными журналами
+    'Сохранение, архивация, удаление архивов старше 365 дней.
+    '###########################################################################################################
+
+    Private Sub Save_LOG_EVT()
+
+        If IO.Directory.Exists(Directory.GetParent(Application.ExecutablePath).ToString & "\arhiv_evt") Then
+        Else
+            IO.Directory.CreateDirectory(Directory.GetParent(Application.ExecutablePath).ToString & "\arhiv_evt")
+        End If
+
+        Try
+            Dim searcher As ManagementObjectSearcher
+            Dim query As ObjectQuery
+            Dim connection As ConnectionOptions
+            Dim scope As ManagementScope = Nothing
+
+            scope = New ManagementScope("\\.\root\CIMV2", connection)
+            scope.Connect()
+
+            scope.Options.EnablePrivileges = True
+            scope.Options.Impersonation = ImpersonationLevel.Impersonate
+            query = New ObjectQuery("Select * from Win32_NTEventLogFile") ' Where LogFileName='Application'
+            searcher = New ManagementObjectSearcher(scope, query)
+
+            For Each o As ManagementObject In searcher.Get()
+                Dim inParams As ManagementBaseObject = o.GetMethodParameters("BackupEventlog")
+                inParams("ArchiveFileName") = Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\arhiv_evt\" & o("LogFileName") & ".evt"
+                Dim outParams As ManagementBaseObject = o.InvokeMethod("BackupEventLog", inParams, Nothing)
+                Debug.Write(outParams.Properties("ReturnValue").Value.ToString())
+
+            Next
+
+        Catch ex As Exception
+            Debug.Write(ex.Message)
+
+        End Try
+
+        Me.BeginInvoke(New MethodInvoker(AddressOf EVT_ARHIVE))
+        'Call EVT_ARHIVE()
+    End Sub
+
+    Private Sub EVT_ARHIVE()
+
+        Dim sFIleName As String
+
+        sFIleName = Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\arhiv_evt\" & Date.Today.Day & "_" & Date.Today.Month & "_" & Date.Today.Year & ".zip"
+
+        Dim folderName As String = Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\arhiv_evt\"
+
+
+        Dim dirs() As String = Directory.GetFiles(Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\arhiv_evt\", "*.evt", SearchOption.TopDirectoryOnly)
+
+        Dim dir As String
+
+        Using zip As ZipFile = New ZipFile
+
+            For Each dir In dirs
+
+                zip.AddFile(dir, "")
+            Next
+            zip.Save(sFIleName)
+
+        End Using
+
+        For Each dir In dirs
+            System.IO.File.Delete(dir)
+        Next
+
+        Me.BeginInvoke(New MethodInvoker(AddressOf ZIP_DELETE))
+        'Call ZIP_DELETE()
+    End Sub
+
+    Private Sub ZIP_DELETE()
+
+        Dim a As String
+        For Each foundFile As String In My.Computer.FileSystem.GetFiles(Directory.GetParent(System.Windows.Forms.Application.ExecutablePath).ToString & "\arhiv_evt")
+            a = (foundFile)
+
+            Try
+
+                Dim dt As DateTime = File.GetCreationTimeUtc(a)
+
+                If (DateTime.Now.Subtract(dt).TotalDays > 365) Then
+                    My.Computer.FileSystem.DeleteFile(a)
+
+                End If
+
+            Catch e As Exception
+                Console.WriteLine("The process failed: {0}", e.ToString())
+            End Try
+
+        Next
+
+    End Sub
+
+
 End Class

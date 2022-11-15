@@ -81,12 +81,12 @@
                             rs.Close()
                             rs = Nothing
 
+                            sSQL = "UPDATE TBL_CONF SET type='" & MainForm.typeCRC & "' WHERE id =" & sCOUNT
+                            DB7.Execute(sSQL)
+
                         Case Else
 
                     End Select
-
-                    sSQL = "UPDATE TBL_CONF SET type='" & MainForm.typeCRC & "' WHERE id =" & sCOUNT
-                    DB7.Execute(sSQL)
 
                 End If
 
@@ -152,6 +152,7 @@
                 rbSHA256.Checked = False
                 rbSHA1.Checked = False
                 rbSHA512.Checked = False
+                rbGOST.Checked = False
 
             Case "Crc32"
                 rbMD5.Checked = False
@@ -159,6 +160,7 @@
                 rbSHA256.Checked = False
                 rbSHA1.Checked = False
                 rbSHA512.Checked = False
+                rbGOST.Checked = False
 
             Case "SHA256"
                 rbMD5.Checked = False
@@ -166,6 +168,7 @@
                 rbSHA256.Checked = True
                 rbSHA1.Checked = False
                 rbSHA512.Checked = False
+                rbGOST.Checked = False
 
             Case "SHA1"
                 rbMD5.Checked = False
@@ -173,6 +176,7 @@
                 rbSHA256.Checked = False
                 rbSHA1.Checked = True
                 rbSHA512.Checked = False
+                rbGOST.Checked = False
 
             Case "SHA512"
                 rbMD5.Checked = False
@@ -180,6 +184,25 @@
                 rbSHA256.Checked = False
                 rbSHA1.Checked = False
                 rbSHA512.Checked = True
+                rbGOST.Checked = False
+
+            Case "GOST"
+                rbMD5.Checked = False
+                rbCRC32.Checked = False
+                rbSHA256.Checked = False
+                rbSHA1.Checked = False
+                rbSHA512.Checked = False
+                rbSHA384.Checked = False
+                rbGOST.Checked = True
+
+            Case "Sha384"
+                rbMD5.Checked = False
+                rbCRC32.Checked = False
+                rbSHA256.Checked = False
+                rbSHA1.Checked = False
+                rbSHA512.Checked = False
+                rbGOST.Checked = False
+                rbSHA384.Checked = True
 
             Case Else
 
@@ -188,8 +211,36 @@
                 rbSHA256.Checked = False
                 rbSHA1.Checked = False
                 rbSHA512.Checked = False
+                rbGOST.Checked = False
+                rbSHA384.Checked = False
 
         End Select
+
+
+
+        Dim LOG_EVT As String
+
+        sSQL = "SELECT * FROM TBL_CONF"
+        rs = New Recordset
+        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+        With rs
+            LOG_EVT = .Fields("EVT").Value
+        End With
+        rs.Close()
+        rs = Nothing
+
+        Select Case LOG_EVT
+
+            Case "1"
+                chkEVT.Checked = True
+
+            Case Else
+
+                chkEVT.Checked = False
+
+        End Select
+
 
     End Sub
 
@@ -203,5 +254,35 @@
 
     Private Sub btnDirectory_Click(sender As Object, e As EventArgs) Handles btnDirectory.Click
         frmAdd_dir.ShowDialog(Me)
+    End Sub
+
+    Private Sub rbSHA384_CheckedChanged(sender As Object, e As EventArgs) Handles rbSHA384.CheckedChanged
+        ' MainForm.typeCRC = "GOST"
+
+        'GetSha384Hash()
+        MainForm.typeCRC = "Sha384"
+
+    End Sub
+
+
+    Private Sub rbGOST_CheckedChanged_1(sender As Object, e As EventArgs) Handles rbGOST.CheckedChanged
+        MainForm.typeCRC = "GOST"
+    End Sub
+
+    Private Sub chkEVT_CheckedChanged(sender As Object, e As EventArgs) Handles chkEVT.CheckedChanged
+
+        Select Case chkEVT.Checked
+
+            Case True
+
+                DB7.Execute("UPDATE TBL_CONF SET EVT='1'")
+
+                MainForm.LOG_EVT = True
+            Case Else
+                DB7.Execute("UPDATE TBL_CONF SET EVT='0'")
+                MainForm.LOG_EVT = False
+        End Select
+
+
     End Sub
 End Class

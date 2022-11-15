@@ -96,6 +96,18 @@ Module MOD_DATABASE
             rs.Close()
             rs = Nothing
 
+            Select Case Vers1
+
+                Case "1"
+
+                    Call ADD_TABLE_V_2()
+
+                Case Else
+
+
+            End Select
+
+
         Catch ex As Exception
             Call ADD_TABLE_()
         End Try
@@ -129,6 +141,20 @@ ERR1:
 
     End Sub
 
+    Private Sub ADD_TABLE_V_2()
+
+        Dim sSQL As String
+
+        sSQL = "ALTER TABLE TBL_CONF ADD COLUMN EVT varchar(50)"
+        DB7.Execute(sSQL)
+
+        sSQL = "UPDATE TBL_CONF SET EVT='0'"
+        DB7.Execute(sSQL)
+
+        sSQL = "UPDATE TBL_CONF SET VERS='2'"
+        DB7.Execute(sSQL)
+
+    End Sub
 
     Public Function RSExistsHash(ByVal sGroupName As String) As Boolean
         On Error GoTo Error_
