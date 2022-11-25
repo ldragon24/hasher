@@ -7,6 +7,8 @@ Imports System.ComponentModel
 Imports System.Text
 Imports Ionic.Zip
 
+
+
 Public Class MainForm
 
     Private MassDel As Boolean = False
@@ -72,7 +74,6 @@ Public Class MainForm
                     sSQL = "INSERT INTO [TBL_CONF]([type],[vers],[EVT]) VALUES('MD5','1','0')"
                     DB7.Execute(sSQL)
 
-
                     Call typeCRCLoad()
             End Select
         Catch ex As Exception
@@ -121,6 +122,10 @@ Public Class MainForm
         ThrTIMER_ = New System.Threading.Thread(AddressOf ThrTIMER)
         ThrTIMER_.Start()
 
+        'Application.DoEvents()
+        'Me.Show()
+        'Application.DoEvents()
+
         'Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
         Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
@@ -132,6 +137,8 @@ Public Class MainForm
         Me.Cursor = Cursors.WaitCursor
 
         Try
+
+            Me.Text = "Проверка контрольной суммы файлов" & " - загрузка данных"
 
             Dim sCOUNT As Integer
             Dim sSQL As String
@@ -171,9 +178,9 @@ Public Class MainForm
                     Call find_file_re()
 
             End Select
-
+            Me.Text = "Проверка контрольной суммы файлов" ' & " - поиск новых файлов"
         Catch ex As Exception
-
+            Me.Text = "Проверка контрольной суммы файлов" ' & " - поиск новых файлов"
         End Try
 
         ResList(lvFiles)
@@ -239,6 +246,9 @@ Public Class MainForm
             Dim d() As String
             d = Split(sfile, ".")
 
+            Dim FileExt As String = FileIO.FileSystem.GetFileInfo(sfile).Extension
+            d = Split(FileExt, ".")
+
             sSQL = "SELECT count(*) as t_n FROM TBL_IGNORE WHERE type='" & d(1) & "'"
 
             Dim rs As Recordset
@@ -294,7 +304,7 @@ Public Class MainForm
 
     End Sub
 
-    Private Sub find_file()
+    Public Sub find_file()
 
         lvFiles.Sorting = SortOrder.None
         lvFiles.ListViewItemSorter = Nothing
@@ -304,92 +314,119 @@ Public Class MainForm
         Dim thisHash As String
         intcount = 0
 
-        On Error Resume Next
-
-        Dim dirs() As String = Directory.GetFiles(BasePath, "*.*", SearchOption.AllDirectories)
+        Dim dirs() As String = System.IO.Directory.GetFiles(BasePath, "*.*", SearchOption.AllDirectories)
 
         Dim dir As String
 
+        pb1.Visible = True
+        pb1.Maximum = dirs.Length
+
         For Each dir In dirs
 
-            If Not File_ignore(dir) Then
+            Dim FileName As String = Strings.Left(FileIO.FileSystem.GetName(dir), 1)
 
-                lvFiles.Items.Add(lvFiles.Items.Count + 1)
-                lvFiles.Items(intcount).SubItems.Add(dir)
+            If FileName = "~" Then
+
+                Debug.Print(dir)
+
+            Else
+
+                If Not File_ignore(dir) Then
 
 
-                Select Case typeCRC
+                    lvFiles.Items.Add(lvFiles.Items.Count + 1)
+                    lvFiles.Items(intcount).SubItems.Add(dir)
 
-                    Case "MD5"
-                        thisHash = GetHash(dir)
+                    Select Case typeCRC
 
-                    Case "Crc32"
+                        Case "MD5"
+                            thisHash = GetHash(dir)
 
-                        thisHash = GetCRC32(dir)
+                        Case "Crc32"
 
-                    Case "SHA256"
+                            thisHash = GetCRC32(dir)
 
-                        thisHash = GetSHA256(dir)
+                        Case "SHA256"
 
-                    Case "SHA512"
+                            thisHash = GetSHA256(dir)
 
-                        thisHash = GetSHA512(dir)
+                        Case "SHA512"
 
-                    Case "SHA1"
+                            thisHash = GetSHA512(dir)
 
-                        thisHash = GetSHA1(dir)
+                        Case "SHA1"
 
-                    Case "Sha384"
+                            thisHash = GetSHA1(dir)
 
-                        thisHash = GetSha384Hash(dir)
+                        Case "Sha384"
 
-                    Case "GOST"
+                            thisHash = GetSha384Hash(dir)
 
-                        thisHash = GetStribog(dir)
 
-                    Case Else
+                        Case "Crc64"
 
-                        MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
+                            thisHash = GetCRC64(dir)
 
-                        frmChS.ShowDialog(Me)
+                        Case "Adler32"
 
-                End Select
+                            thisHash = GetAdler32(dir)
 
-                lvFiles.Items(intcount).SubItems.Add(thisHash)
+                        Case "ripmd160"
+                            thisHash = GetRipEmd(dir)
 
-                Dim sSQL As String
-                Dim sCOUNT As Integer
+                        Case "GOST"
 
-                sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
+                            thisHash = GetStribog(dir)
 
-                Dim rs As Recordset
-                rs = New Recordset
-                rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+                        Case Else
 
-                With rs
-                    sCOUNT = .Fields("t_n").Value
-                End With
-                rs.Close()
-                rs = Nothing
+                            MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
 
-                Select Case sCOUNT
+                            frmChS.ShowDialog(Me)
 
-                    Case 0
-                        ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
-                    Case Else
+                    End Select
 
-                        If Not RSExistsHash(dir) Then
+                    lvFiles.Items(intcount).SubItems.Add(thisHash)
+
+                    Dim sSQL As String
+                    Dim sCOUNT As Integer
+
+                    sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
+
+                    Dim rs As Recordset
+                    rs = New Recordset
+                    rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+                    With rs
+                        sCOUNT = .Fields("t_n").Value
+                    End With
+                    rs.Close()
+                    rs = Nothing
+
+                    Select Case sCOUNT
+
+                        Case 0
                             ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
-                        End If
+                        Case Else
 
-                End Select
+                            If Not RSExistsHash(dir) Then
+                                ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
+                            End If
 
-                intcount = intcount + 1
+                    End Select
+
+                    intcount = intcount + 1
+                    pb1.Value = intcount
+                End If
+
+
             End If
+
+
 
         Next
 
-
+        pb1.Visible = False
         ResList(lvFiles)
         'End Try
 
@@ -421,7 +458,7 @@ Public Class MainForm
 
         intcount = 0
         Try
-
+            lvFiles.Visible = False
             Dim sSQL As String
 
             sSQL = "SELECT * FROM TBL_HASH"
@@ -461,7 +498,7 @@ Public Class MainForm
                     If IO.File.Exists(.Fields("file").Value) Then
 
 
-                        'typeCRC = "GOST"
+                        ' typeCRC = "SHA224"
 
 
                         Select Case typeCRC
@@ -489,6 +526,17 @@ Public Class MainForm
                             Case "Sha384"
 
                                 newHash = GetSha384Hash(.Fields("file").Value)
+
+                            Case "Crc64"
+
+                                newHash = GetCRC64(.Fields("file").Value)
+
+                            Case "Adler32"
+
+                                newHash = GetAdler32(.Fields("file").Value)
+
+                            Case "ripmd160"
+                                newHash = GetRipEmd(.Fields("file").Value)
 
                             Case "GOST"
                                 '
@@ -643,8 +691,11 @@ Public Class MainForm
 
             End Select
 
+            lvFiles.Visible = True
+
         Catch ex As Exception
             MsgBox(ex.Message)
+            lvFiles.Visible = True
             ResList(lvFiles)
         End Try
 
@@ -900,6 +951,17 @@ Public Class MainForm
 
                     newHash = GetSha384Hash(lvFiles.SelectedItems(intj).SubItems(1).Text)
 
+                Case "Crc64"
+
+                    newHash = GetCRC64(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+                Case "Adler32"
+
+                    newHash = GetAdler32(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
+                Case "ripmd160"
+                    newHash = GetRipEmd(lvFiles.SelectedItems(intj).SubItems(1).Text)
+
                 Case "GOST"
 
                     newHash = GetStribog(lvFiles.SelectedItems(intj).SubItems(1).Text)
@@ -913,14 +975,6 @@ Public Class MainForm
             End Select
 
 
-            lvFiles.SelectedItems(intj).SubItems(2).Text = newHash
-            lvFiles.SelectedItems(intj).SubItems(3).Text = "Соответствует"
-            lvFiles.SelectedItems(intj).SubItems(4).Text = DateAndTime.Now.ToString
-            lvFiles.SelectedItems(CInt(intj)).ForeColor = Color.Black
-            lvFiles.SelectedItems(CInt(intj)).BackColor = Color.White
-
-
-
             Dim sSQL As String
 
             Try
@@ -929,6 +983,13 @@ Public Class MainForm
                 DB7.Execute(sSQL)
 
                 AddLogEntr("Записана новая контрольная сумма для файла: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Контрольная сумма: " & newHash & vbCrLf & "Старая контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
+
+                lvFiles.SelectedItems(intj).SubItems(2).Text = newHash
+                lvFiles.SelectedItems(intj).SubItems(3).Text = "Соответствует"
+                lvFiles.SelectedItems(intj).SubItems(4).Text = DateAndTime.Now.ToString
+                lvFiles.SelectedItems(CInt(intj)).ForeColor = Color.Black
+                lvFiles.SelectedItems(CInt(intj)).BackColor = Color.White
+
 
             Catch ex As Exception
                 MsgBox(ex.Message)
@@ -1478,6 +1539,17 @@ Public Class MainForm
 
                         thisHash = GetSha384Hash(fdlg.FileName)
 
+                    Case "Crc64"
+                        thisHash = GetCRC64(fdlg.FileName)
+
+                    Case "Adler32"
+
+                        thisHash = GetAdler32(fdlg.FileName)
+
+                    Case "ripmd160"
+
+                        thisHash = GetRipEmd(fdlg.FileName)
+
                     Case "GOST"
 
                         thisHash = GetStribog(fdlg.FileName)
@@ -1547,8 +1619,6 @@ Public Class MainForm
             EventLog.CreateEventSource(Application.ProductName, "Application")
         End If
 
-        ' AddHandler myLog.EntryWritten, AddressOf OnEntryWritten
-
         With myLog
             .Source = Application.ProductName
             .Log = "Application"
@@ -1571,11 +1641,7 @@ Public Class MainForm
 
     End Sub
 
-    'Public Sub OnEntryWritten(ByVal source As Object, ByVal e As EntryWrittenEventArgs)
-    '    Console.WriteLine(("Written: " + e.Entry.Message))
-    'End Sub
-
-    Private Sub Find_New_Files()
+    Public Sub Find_New_Files()
 
         Dim intcount As Integer
         Dim thisHash As String
@@ -1595,13 +1661,13 @@ Public Class MainForm
         rs = Nothing
 
         If sCOUNT = 0 Then
-            MsgBox("Не указаны каталоги для сканировоания", MsgBoxStyle.Exclamation, Application.ProductName)
-            frmAdd_dir.ShowDialog(Me)
+            ' MsgBox("Не указаны каталоги для сканировоания", MsgBoxStyle.Exclamation, Application.ProductName)
+            'frmAdd_dir.ShowDialog(Me)
+            LoadData()
             Exit Sub
         End If
 
         sSQL = "SELECT * FROM TBL_DIR"
-
 
         rs = New Recordset
         rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
@@ -1613,63 +1679,83 @@ Public Class MainForm
                 Dim dirs() As String = Directory.GetFiles(.Fields("dir").Value, "*.*", SearchOption.AllDirectories)
                 Dim dir As String
 
+                Me.Text = "Проверка контрольной суммы файлов" & " - поиск новых файлов"
                 For Each dir In dirs
 
-                    If Not File_ignore(dir) Then
+                    Dim FileName As String = Strings.Left(FileIO.FileSystem.GetName(dir), 1)
 
-                        sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
+                    If FileName = "~" Then
 
-                        Dim rs1 As Recordset
-                        rs1 = New Recordset
-                        rs1.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+                        Debug.Print(dir)
 
-                        With rs1
-                            sCOUNT = .Fields("t_n").Value
-                        End With
-                        rs1.Close()
-                        rs1 = Nothing
+                    Else
 
-                        Select Case sCOUNT
-                            Case 0
-                                'ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
-                            Case Else
+                        If Not File_ignore(dir) Then
 
-                                If Not RSExistsHash(dir) Then
+                            sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
 
-                                    Select Case typeCRC
-                                        Case "MD5"
-                                            thisHash = GetHash(dir)
-                                        Case "Crc32"
-                                            thisHash = GetCRC32(dir)
-                                        Case "SHA256"
-                                            thisHash = GetSHA256(dir)
-                                        Case "SHA512"
-                                            thisHash = GetSHA512(dir)
-                                        Case "SHA1"
-                                            thisHash = GetSHA1(dir)
-                                        Case "Sha384"
+                            Dim rs1 As Recordset
+                            rs1 = New Recordset
+                            rs1.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
 
-                                            thisHash = GetSha384Hash(dir)
+                            With rs1
+                                sCOUNT = .Fields("t_n").Value
+                            End With
+                            rs1.Close()
+                            rs1 = Nothing
 
-                                        Case "GOST"
-                                            ' thisHash = GetGOST(dir)
-                                            thisHash = GetStribog(dir)
+                            Select Case sCOUNT
+                                Case 0
+                                    'ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
+                                Case Else
 
-                                        Case Else
-                                    End Select
+                                    If Not RSExistsHash(dir) Then
 
-                                    ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
+                                        Select Case typeCRC
+                                            Case "MD5"
+                                                thisHash = GetHash(dir)
+                                            Case "Crc32"
+                                                thisHash = GetCRC32(dir)
+                                            Case "SHA256"
+                                                thisHash = GetSHA256(dir)
+                                            Case "SHA512"
+                                                thisHash = GetSHA512(dir)
+                                            Case "SHA1"
+                                                thisHash = GetSHA1(dir)
+                                            Case "Sha384"
+                                                thisHash = GetSha384Hash(dir)
+                                            Case "Crc64"
+                                                thisHash = GetCRC64(dir)
 
-                                    Dim d = Now
-                                    IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Найден новый файл: " & "|" & dir & "|" & " Контрольная сумма: " & "|" & thisHash & vbNewLine, System.Text.Encoding.Default)
-                                    '############################################
+                                            Case "Adler32"
+                                                thisHash = GetAdler32(dir)
 
-                                    AddLogEntr("Найден новый файл: " & dir & vbCrLf & " Контрольная сумма: " & thisHash, 1)
+                                            Case "ripmd160"
+                                                thisHash = GetRipEmd(dir)
 
-                                End If
-                        End Select
-                        intcount = intcount + 1
+                                            Case "GOST"
+                                                ' thisHash = GetGOST(dir)
+                                                thisHash = GetStribog(dir)
+
+                                            Case Else
+                                        End Select
+
+                                        ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
+
+                                        Dim d = Now
+                                        IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Найден новый файл: " & "|" & dir & "|" & " Контрольная сумма: " & "|" & thisHash & vbNewLine, System.Text.Encoding.Default)
+                                        '############################################
+
+                                        AddLogEntr("Найден новый файл: " & dir & vbCrLf & " Контрольная сумма: " & thisHash, 1)
+
+                                    End If
+                            End Select
+                            intcount = intcount + 1
+                        End If
+
                     End If
+
+
 
                 Next
 
@@ -1677,6 +1763,7 @@ Public Class MainForm
             Loop
         End With
 
+        Me.Text = "Проверка контрольной суммы файлов" ' & " - поиск новых файлов"
         rs.Close()
         rs = Nothing
 
@@ -1733,14 +1820,10 @@ Public Class MainForm
 
                 Case Else
 
-
             End Select
         Catch ex As Exception
 
         End Try
-
-
-
 
     End Sub
 
@@ -1813,7 +1896,7 @@ Public Class MainForm
         For Each dir In dirs
             System.IO.File.Delete(dir)
         Next
-
+        AddLogEntr("Архив системных журналов сохранен: " & sFIleName, 2)
         Me.BeginInvoke(New MethodInvoker(AddressOf ZIP_DELETE))
         'Call ZIP_DELETE()
     End Sub
@@ -1830,7 +1913,7 @@ Public Class MainForm
 
                 If (DateTime.Now.Subtract(dt).TotalDays > 365) Then
                     My.Computer.FileSystem.DeleteFile(a)
-
+                    AddLogEntr("Из каталога с архивами системных журналов удален устаревший файл: " & a, 2)
                 End If
 
             Catch e As Exception

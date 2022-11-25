@@ -1,6 +1,9 @@
 ﻿Imports System.Security.Cryptography
 Imports System.Text
 Imports System.IO
+Imports System.Text.RegularExpressions
+
+
 Module hasher
     Public PrPath As String
     Public BasePath As String
@@ -8,18 +11,30 @@ Module hasher
 
     Private sTEXT As String
 
-    Public Function GetHash(theInput As String) As String
+    Public Function GetHash(sfile As String) As String
 
         Dim hash = MD5.Create()
-        Dim hashValue() As Byte
+        Dim fInfo As FileInfo = New FileInfo(sfile)
 
-        Dim fileStream As FileStream = File.OpenRead(theInput)
-        fileStream.Position = 0
-        hashValue = hash.ComputeHash(fileStream)
-        Dim hash_hex = PrintByteArray(hashValue)
-        fileStream.Close()
-        Return hash_hex
+        Using fileStream1 = fInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read)
+            Try
 
+                fileStream1.Position = 0
+
+                Dim hashValue1 = hash.ComputeHash(fileStream1)
+                PrintByteArray(hashValue1)
+
+                Return PrintByteArray(hashValue1)
+
+            Catch e As IOException
+
+            Catch e As UnauthorizedAccessException
+
+            End Try
+
+        End Using
+
+        ' Return hash_hex
     End Function
 
     Public Function PrintByteArray(ByVal array() As Byte)
@@ -37,13 +52,22 @@ Module hasher
         Try
             Using _sha512 As New System.Security.Cryptography.SHA256CryptoServiceProvider
 
-                Using stream = File.OpenRead(sfile)
-                    Dim hash2 = _sha512.ComputeHash(stream)
-                    stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
-                    'Trace.WriteLine(String.Format("{0}", stmp))
-                    Return stmp
+                Dim fInfo As FileInfo = New FileInfo(sfile)
+                Using fileStream1 = fInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read)
+                    Try
+
+                        Dim hash2 = _sha512.ComputeHash(fileStream1)
+                        stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
+                        Return stmp
+
+                    Catch e As IOException
+
+                    Catch e As UnauthorizedAccessException
+
+                    End Try
 
                 End Using
+
             End Using
 
         Catch ex As Exception
@@ -59,12 +83,22 @@ Module hasher
         Try
             Using _sha512 As New System.Security.Cryptography.SHA512CryptoServiceProvider
 
-                Using stream = File.OpenRead(sfile)
-                    Dim hash2 = _sha512.ComputeHash(stream)
-                    stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
-                    ' Trace.WriteLine(String.Format("{0}", stmp))
-                    Return stmp
+                Dim fInfo As FileInfo = New FileInfo(sfile)
+                Using fileStream1 = fInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read)
+                    Try
+
+                        Dim hash2 = _sha512.ComputeHash(fileStream1)
+                        stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
+                        Return stmp
+
+                    Catch e As IOException
+
+                    Catch e As UnauthorizedAccessException
+
+                    End Try
+
                 End Using
+
             End Using
 
         Catch ex As Exception
@@ -79,12 +113,24 @@ Module hasher
 
         Try
             Using _sha512 As New System.Security.Cryptography.SHA384CryptoServiceProvider
-                Using stream = File.OpenRead(sfile)
-                    Dim _hash = _sha512.ComputeHash(stream)
-                    _result$ = BitConverter.ToString(_hash).Replace("-", String.Empty)
-                    ' Trace.WriteLine(String.Format("{0}", _result$))
-                    Return _result$
+
+                Dim fInfo As FileInfo = New FileInfo(sfile)
+                Using fileStream1 = fInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read)
+                    Try
+
+                        Dim hash2 = _sha512.ComputeHash(fileStream1)
+                        _result$ = BitConverter.ToString(hash2).Replace("-", String.Empty)
+                        Return _result$
+
+                    Catch e As IOException
+
+                    Catch e As UnauthorizedAccessException
+
+                    End Try
+
                 End Using
+
+
             End Using
         Catch ex As Exception
             Trace.WriteLine(Err.Description)
@@ -93,33 +139,152 @@ Module hasher
 
     End Function
 
+    Public Function GetAdler32(ByVal sfile As String) As String
+
+        ' Dim acs As AdlerChecksum = New AdlerChecksum()
+
+        'If acs.MakeForFile(sfile) Then
+        'Return acs.ToString() 'success
+        ' Else
+
+        ' End If
+
+        Dim arrB() As Byte = My.Computer.FileSystem.ReadAllBytes(sfile)
+        Return Adler32(arrB)
+
+    End Function
+
+    Function Adler32(arrB() As Byte) As String
+
+        Dim s1 As UInt32 = 1
+        Dim s2 As UInt32 = 0
+
+        For Each byteB In arrB
+            s1 = (s1 + byteB) Mod 65521
+            s2 = (s2 + s1) Mod 65521
+        Next
+
+        s2 = (s2 << 16) + s1
+
+        Return s2.ToString("X2").PadLeft(8, "0"c)
+
+    End Function
+
+    Public Function GetRipEmd(ByVal sfile As String) As String
+
+        Try
+
+            Dim fInfo As FileInfo = New FileInfo(sfile)
+
+            Using fileStream1 = fInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read)
+                Dim myRIPEMD160 As RIPEMD160 = RIPEMD160Managed.Create()
+                Dim hashValue As Byte()
+
+                hashValue = myRIPEMD160.ComputeHash(fileStream1)
+                PrintByteArray(hashValue)
+                Return PrintByteArray(hashValue)
+            End Using
+
+        Catch __unusedDirectoryNotFoundException1__ As DirectoryNotFoundException
+
+
+        Catch __unusedIOException2__ As IOException
+
+
+        End Try
+
+    End Function
+
+
     Public Function GetSHA1(ByVal sfile As String) As String
 
-        Using fs As FileStream = File.OpenRead(sfile)
-            Dim sha As SHA1 = New SHA1Managed()
-            Return BitConverter.ToString(sha.ComputeHash(fs)).Replace("-", String.Empty)
+        ' If IsValidPath(sfile) = True Then
+
+        Dim fInfo As FileInfo = New FileInfo(sfile)
+        Using fileStream1 = fInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read)
+            Try
+
+                Dim sha As SHA1 = New SHA1Managed()
+                Return BitConverter.ToString(sha.ComputeHash(fileStream1)).Replace("-", String.Empty)
+
+            Catch e As IOException
+
+            Catch e As UnauthorizedAccessException
+
+            End Try
+
+        End Using
+
+        ' End If
+
+
+    End Function
+
+    Public Function GetCRC64(ByVal sfile As String) As String
+
+        Dim fInfo As FileInfo = New FileInfo(sfile)
+        Using fileStream1 = fInfo.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+            Try
+
+                Return UCase(Hex(CRC64.ComputeChecksum(System.IO.File.ReadAllBytes(sfile))))
+
+            Catch e As IOException
+
+            Catch e As UnauthorizedAccessException
+
+            End Try
+
         End Using
 
     End Function
 
+
+    Public Function IsValidPath(ByVal path As String) As Boolean
+        Dim r As Regex = New Regex("^(([a-zA-Z]\:)|(\\))(\\{1}|((\\{1})[^\\]([/:*?<>""|]*))+)$")
+        Return r.IsMatch(path)
+    End Function
+
+    Public Function FilenameIsOK(ByVal fileNameAndPath As String) As Boolean
+        Dim fileName = Path.GetFileName(fileNameAndPath)
+        Dim directory = Path.GetDirectoryName(fileNameAndPath)
+
+        For Each c In Path.GetInvalidFileNameChars()
+            If fileName.Contains(c) Then
+                Return False
+            Else
+                Return True
+            End If
+        Next
+
+        'For Each c In Path.GetInvalidPathChars()
+        '    If directory.Contains(c) Then
+        '        Return False
+        '    End If
+        'Next
+        '
+    End Function
+
+
+
+
     Public Function GetStribog(ByVal sfile As String) As String
 
-        Dim gst As GOST2 = New GOST2(512)
-        Dim gst512 As String
+        'Dim gst As GOST2 = New GOST2(512)
+        'Dim gst512 As String
 
-        Using fs = File.OpenRead(sfile)
-            Dim fileData = New Byte(fs.Length - 1) {}
-            fs.Read(fileData, 0, fs.Length)
-            Dim checkSum As Byte() = gst.GetHashGOST(fileData)
-            gst512 = BitConverter.ToString(checkSum)
-            Return gst512
-        End Using
+        'Using fs = File.OpenRead(sfile)
+        '    Dim fileData = New Byte(fs.Length - 1) {}
+        '    fs.Read(fileData, 0, fs.Length)
+        '    Dim checkSum As Byte() = gst.GetHashGOST(fileData)
+        '    gst512 = BitConverter.ToString(checkSum)
+        '    Return gst512
+        'End Using
 
     End Function
 
     Public Function GetSHA224(ByVal sfile As String) As String
 
-        Return SHA224.SHA224(sfile)
+        ' Return SHA224.SHA224(sfile)
 
     End Function
 
@@ -216,10 +381,5 @@ Module hasher
 
         Return _Buffer
     End Function
-
-    Private Sub StribogChaeckSumm()
-        Throw New NotImplementedException
-    End Sub
-
 
 End Module

@@ -51,9 +51,9 @@ Partial Class frmAdd_dir
         'btnAdd
         '
         Me.btnAdd.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnAdd.Location = New System.Drawing.Point(396, 3)
+        Me.btnAdd.Location = New System.Drawing.Point(376, 3)
         Me.btnAdd.Name = "btnAdd"
-        Me.btnAdd.Size = New System.Drawing.Size(54, 23)
+        Me.btnAdd.Size = New System.Drawing.Size(74, 23)
         Me.btnAdd.TabIndex = 5
         Me.btnAdd.Text = "&Добавить"
         Me.btnAdd.UseVisualStyleBackColor = True
@@ -63,14 +63,14 @@ Partial Class frmAdd_dir
         Me.txtType.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtType.Location = New System.Drawing.Point(3, 3)
         Me.txtType.Name = "txtType"
-        Me.txtType.Size = New System.Drawing.Size(387, 20)
+        Me.txtType.Size = New System.Drawing.Size(367, 20)
         Me.txtType.TabIndex = 4
         '
         'cmBmenu
         '
         Me.cmBmenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuDeltoBranch, Me.ToolStripMenuItem1})
         Me.cmBmenu.Name = "cmMENU"
-        Me.cmBmenu.Size = New System.Drawing.Size(184, 48)
+        Me.cmBmenu.Size = New System.Drawing.Size(184, 70)
         '
         'mnuDeltoBranch
         '
@@ -90,10 +90,10 @@ Partial Class frmAdd_dir
         '
         Me.TableLayoutPanel1.ColumnCount = 2
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 60.0!))
+        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.txtType, 0, 0)
-        Me.TableLayoutPanel1.Controls.Add(Me.btnAdd, 1, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.lvFiles, 0, 1)
+        Me.TableLayoutPanel1.Controls.Add(Me.btnAdd, 1, 0)
         Me.TableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TableLayoutPanel1.Location = New System.Drawing.Point(0, 0)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"

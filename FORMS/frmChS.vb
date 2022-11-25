@@ -1,4 +1,5 @@
 ﻿Public Class frmChS
+    Dim oldType As String
 
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
 
@@ -92,7 +93,61 @@
 
         End Select
 
-        MainForm.LoadData()
+        If oldType <> MainForm.typeCRC Then
+
+            If MsgBox("Изменен алгоритм вычисления контрольной суммы" & vbCrLf & "Очистить существующие данные" & vbCrLf & "и пересчитать контрольные суммы?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+
+                sSQL = "SELECT count(*) as t_n FROM TBL_DIR"
+
+                rs = New Recordset
+                rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+                With rs
+                    sCOUNT = .Fields("t_n").Value
+                End With
+                rs.Close()
+                rs = Nothing
+
+                Select Case sCOUNT
+
+                    Case 0
+
+                        Call MainForm.LoadData()
+
+                    Case Else
+
+                        sSQL = "Delete * from TBL_HASH"
+                        DB7.Execute(sSQL)
+
+
+                        sSQL = "SELECT * FROM TBL_DIR"
+                        rs = New Recordset
+                        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+                        MainForm.lvFiles.Visible = False
+
+                        With rs
+                            .MoveFirst()
+                            Do While Not .EOF
+
+                                BasePath = .Fields("dir").Value
+                                Call MainForm.find_file()
+
+                                .MoveNext()
+                            Loop
+                        End With
+                        rs.Close()
+                        rs = Nothing
+                        MainForm.lvFiles.Visible = True
+
+                End Select
+            End If
+
+            MainForm.AddLogEntr("Изменен алгоритм вычисления контрольной суммы с " & oldType & " на " & MainForm.typeCRC & vbCrLf & "Произведена очистка базы данных и пересчитаны контрольные суммы", 1)
+
+        End If
+
+        '        MainForm.LoadData()
         Me.Close()
 
     End Sub
@@ -110,6 +165,8 @@
     End Sub
 
     Private Sub frmChS_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        oldType = MainForm.typeCRC
 
         Dim sSQL As String
 
@@ -148,71 +205,47 @@
 
             Case "MD5"
                 rbMD5.Checked = True
-                rbCRC32.Checked = False
-                rbSHA256.Checked = False
-                rbSHA1.Checked = False
-                rbSHA512.Checked = False
-                rbGOST.Checked = False
 
             Case "Crc32"
-                rbMD5.Checked = False
+
                 rbCRC32.Checked = True
-                rbSHA256.Checked = False
-                rbSHA1.Checked = False
-                rbSHA512.Checked = False
-                rbGOST.Checked = False
 
             Case "SHA256"
-                rbMD5.Checked = False
-                rbCRC32.Checked = False
+
                 rbSHA256.Checked = True
-                rbSHA1.Checked = False
-                rbSHA512.Checked = False
-                rbGOST.Checked = False
 
             Case "SHA1"
-                rbMD5.Checked = False
-                rbCRC32.Checked = False
-                rbSHA256.Checked = False
+
                 rbSHA1.Checked = True
-                rbSHA512.Checked = False
-                rbGOST.Checked = False
 
             Case "SHA512"
-                rbMD5.Checked = False
-                rbCRC32.Checked = False
-                rbSHA256.Checked = False
-                rbSHA1.Checked = False
+
                 rbSHA512.Checked = True
-                rbGOST.Checked = False
 
             Case "GOST"
-                rbMD5.Checked = False
-                rbCRC32.Checked = False
-                rbSHA256.Checked = False
-                rbSHA1.Checked = False
-                rbSHA512.Checked = False
-                rbSHA384.Checked = False
+
                 rbGOST.Checked = True
 
             Case "Sha384"
-                rbMD5.Checked = False
-                rbCRC32.Checked = False
-                rbSHA256.Checked = False
-                rbSHA1.Checked = False
-                rbSHA512.Checked = False
-                rbGOST.Checked = False
+
                 rbSHA384.Checked = True
+
+            Case "Crc64"
+
+                rbCRC64.Checked = True
+
+            Case "Adler32"
+
+                rbAdler.Checked = True
+
+
+            Case "ripmd160"
+
+                rbRipMD.Checked = True
 
             Case Else
 
                 rbMD5.Checked = True
-                rbCRC32.Checked = False
-                rbSHA256.Checked = False
-                rbSHA1.Checked = False
-                rbSHA512.Checked = False
-                rbGOST.Checked = False
-                rbSHA384.Checked = False
 
         End Select
 
@@ -284,5 +317,17 @@
         End Select
 
 
+    End Sub
+
+    Private Sub rbCRC64_CheckedChanged(sender As Object, e As EventArgs) Handles rbCRC64.CheckedChanged
+        MainForm.typeCRC = "Crc64"
+    End Sub
+
+    Private Sub rbAdler_CheckedChanged(sender As Object, e As EventArgs) Handles rbAdler.CheckedChanged
+        MainForm.typeCRC = "Adler32"
+    End Sub
+
+    Private Sub rbRipMD_CheckedChanged(sender As Object, e As EventArgs) Handles rbRipMD.CheckedChanged
+        MainForm.typeCRC = "ripmd160"
     End Sub
 End Class

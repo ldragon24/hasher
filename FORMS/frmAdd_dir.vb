@@ -6,6 +6,19 @@ Public Class frmAdd_dir
     Private sSID As Integer
     Private sTXTtmp As String
 
+    Private Sub frmAdd_dir_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+
+        If BasePath = "" Then
+
+        Else
+
+            Call MainForm.find_file()
+        End If
+
+
+
+    End Sub
+
     Private Sub frmAdd_dir_Load(sender As Object, e As EventArgs) Handles Me.Load
 
         lvFiles.Columns.Add(("id"), 20, HorizontalAlignment.Left)
@@ -70,6 +83,7 @@ Public Class frmAdd_dir
             Select Case sCOUNT
 
                 Case 0
+                    lvFiles.Items.Clear()
 
                 Case Else
 
@@ -85,6 +99,7 @@ Public Class frmAdd_dir
 
 
                             lvFiles.Items.Add(.Fields("id").Value)
+                            BasePath = .Fields("dir").Value
                             lvFiles.Items(intcount).SubItems.Add(.Fields("dir").Value)
 
                             intcount = intcount + 1
@@ -100,6 +115,8 @@ Public Class frmAdd_dir
         Catch ex As Exception
 
         End Try
+
+        ResList(lvFiles)
 
     End Sub
 
@@ -122,6 +139,7 @@ Public Class frmAdd_dir
 
         DB7.Execute(sSQL)
 
+        'LoadData()
 
     End Sub
 
