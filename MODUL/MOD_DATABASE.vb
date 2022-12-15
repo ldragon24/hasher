@@ -15,6 +15,7 @@ Module MOD_DATABASE
     Public Base_Name As String
     Public TIME_TOOL_TIPS As Integer = 20
     Private m_SortingColumn As ColumnHeader
+    Public NEWFILES As Integer
 
     Public Sub CREATE_DATABASE()
 
@@ -78,8 +79,6 @@ Module MOD_DATABASE
 
         End Try
 
-
-
         'Проверяем версию базы данных
         Try
             Dim sSQL, Vers1 As String
@@ -102,8 +101,20 @@ Module MOD_DATABASE
 
                     Call ADD_TABLE_V_2()
 
+                Case "2"
+
+                    Call ADD_TABLE_V_3()
+
+                Case "3"
+
+                    Call ADD_TABLE_V_4()
+
+                Case "4"
+
+
                 Case Else
 
+                    ADD_TABLE_()
 
             End Select
 
@@ -139,6 +150,9 @@ ERR1:
         sSQL = "UPDATE TBL_CONF SET VERS='1'"
         DB7.Execute(sSQL)
 
+        Call ADD_TABLE_V_2()
+
+
     End Sub
 
     Private Sub ADD_TABLE_V_2()
@@ -152,6 +166,54 @@ ERR1:
         DB7.Execute(sSQL)
 
         sSQL = "UPDATE TBL_CONF SET VERS='2'"
+        DB7.Execute(sSQL)
+
+        Call ADD_TABLE_V_3()
+
+    End Sub
+
+    Private Sub ADD_TABLE_V_3()
+
+        Dim sSQL As String
+
+        sSQL = "ALTER TABLE TBL_CONF ADD COLUMN NEWFILES varchar(50)"
+        DB7.Execute(sSQL)
+
+        sSQL = "UPDATE TBL_CONF SET NEWFILES='0'"
+        DB7.Execute(sSQL)
+
+        sSQL = "UPDATE TBL_CONF SET VERS='3'"
+        DB7.Execute(sSQL)
+
+        ADD_TABLE_V_4()
+
+    End Sub
+
+    Private Sub ADD_TABLE_V_4()
+
+        Dim sSQL As String
+
+        sSQL = "ALTER TABLE TBL_CONF ADD COLUMN nudH varchar(50)"
+        DB7.Execute(sSQL)
+
+        sSQL = "ALTER TABLE TBL_CONF ADD COLUMN nudM varchar(50)"
+        DB7.Execute(sSQL)
+
+        sSQL = "ALTER TABLE TBL_CONF ADD COLUMN nudS varchar(50)"
+        DB7.Execute(sSQL)
+
+        sSQL = "UPDATE TBL_CONF SET nudH='23'"
+        DB7.Execute(sSQL)
+        sSQL = "UPDATE TBL_CONF SET nudM='52'"
+        DB7.Execute(sSQL)
+        sSQL = "UPDATE TBL_CONF SET nudS='17'"
+        DB7.Execute(sSQL)
+
+        MainForm.nudH = "23"
+        MainForm.nudM = "52"
+        MainForm.nudS = "17"
+
+        sSQL = "UPDATE TBL_CONF SET VERS='4'"
         DB7.Execute(sSQL)
 
     End Sub
@@ -189,6 +251,41 @@ ERR1:
 Error_:
         RSExistsHash = False
     End Function
+
+    Public Function RSExistsDir(ByVal sGroupName As String) As Boolean
+        On Error GoTo Error_
+        RSExistsDir = False
+        Dim sSQL As String
+        Dim sCOUNT As String
+
+        If Len(sGroupName) = 0 Then Exit Function
+
+        sSQL = "SELECT COUNT(*) AS t_n FROM TBL_DIR WHERE dir='" & sGroupName & "'"
+
+        Dim rs As Recordset
+        rs = New Recordset
+        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+        With rs
+            sCOUNT = .Fields("t_n").Value
+        End With
+        rs.Close()
+        rs = Nothing
+
+        Select Case sCOUNT
+
+            Case 0
+                RSExistsDir = False
+            Case Else
+                RSExistsDir = True
+
+        End Select
+
+        Exit Function
+Error_:
+        RSExistsDir = False
+    End Function
+
 
     Public Function RsExistTXT(ByVal sGroupName As String, ByVal sHash As String, ByVal stmp As String) As Boolean
         RsExistTXT = False

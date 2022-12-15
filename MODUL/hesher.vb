@@ -3,7 +3,6 @@ Imports System.Text
 Imports System.IO
 Imports System.Text.RegularExpressions
 
-
 Module hasher
     Public PrPath As String
     Public BasePath As String
@@ -24,7 +23,7 @@ Module hasher
                 Dim hashValue1 = hash.ComputeHash(fileStream1)
                 PrintByteArray(hashValue1)
 
-                Return PrintByteArray(hashValue1)
+                Return UCase(PrintByteArray(hashValue1))
 
             Catch e As IOException
 
@@ -58,7 +57,7 @@ Module hasher
 
                         Dim hash2 = _sha512.ComputeHash(fileStream1)
                         stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
-                        Return stmp
+                        Return UCase(stmp)
 
                     Catch e As IOException
 
@@ -89,7 +88,7 @@ Module hasher
 
                         Dim hash2 = _sha512.ComputeHash(fileStream1)
                         stmp = (BitConverter.ToString(hash2).Replace("-", String.Empty))
-                        Return stmp
+                        Return UCase(stmp)
 
                     Catch e As IOException
 
@@ -120,7 +119,7 @@ Module hasher
 
                         Dim hash2 = _sha512.ComputeHash(fileStream1)
                         _result$ = BitConverter.ToString(hash2).Replace("-", String.Empty)
-                        Return _result$
+                        Return UCase(_result$)
 
                     Catch e As IOException
 
@@ -141,16 +140,13 @@ Module hasher
 
     Public Function GetAdler32(ByVal sfile As String) As String
 
-        ' Dim acs As AdlerChecksum = New AdlerChecksum()
+        Try
+            Dim arrB() As Byte = My.Computer.FileSystem.ReadAllBytes(sfile)
+            Return UCase(Adler32(arrB))
 
-        'If acs.MakeForFile(sfile) Then
-        'Return acs.ToString() 'success
-        ' Else
+        Catch ex As Exception
 
-        ' End If
-
-        Dim arrB() As Byte = My.Computer.FileSystem.ReadAllBytes(sfile)
-        Return Adler32(arrB)
+        End Try
 
     End Function
 
@@ -182,7 +178,7 @@ Module hasher
 
                 hashValue = myRIPEMD160.ComputeHash(fileStream1)
                 PrintByteArray(hashValue)
-                Return PrintByteArray(hashValue)
+                Return UCase(PrintByteArray(hashValue))
             End Using
 
         Catch __unusedDirectoryNotFoundException1__ As DirectoryNotFoundException
@@ -195,7 +191,6 @@ Module hasher
 
     End Function
 
-
     Public Function GetSHA1(ByVal sfile As String) As String
 
         ' If IsValidPath(sfile) = True Then
@@ -205,7 +200,7 @@ Module hasher
             Try
 
                 Dim sha As SHA1 = New SHA1Managed()
-                Return BitConverter.ToString(sha.ComputeHash(fileStream1)).Replace("-", String.Empty)
+                Return UCase(BitConverter.ToString(sha.ComputeHash(fileStream1)).Replace("-", String.Empty))
 
             Catch e As IOException
 
@@ -216,8 +211,6 @@ Module hasher
         End Using
 
         ' End If
-
-
     End Function
 
     Public Function GetCRC64(ByVal sfile As String) As String
@@ -238,6 +231,23 @@ Module hasher
 
     End Function
 
+    'Public Function GetBlake2(ByVal sfile As String) As String
+
+    '    Dim fInfo As FileInfo = New FileInfo(sfile)
+    '    Using fileStream1 = fInfo.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+    '        Try
+
+    '            Return UCase(Blake2sCSharp.ComputeHash(System.IO.File.ReadAllBytes(sfile)))
+
+    '        Catch e As IOException
+
+    '        Catch e As UnauthorizedAccessException
+
+    '        End Try
+
+    '    End Using
+
+    'End Function
 
     Public Function IsValidPath(ByVal path As String) As Boolean
         Dim r As Regex = New Regex("^(([a-zA-Z]\:)|(\\))(\\{1}|((\\{1})[^\\]([/:*?<>""|]*))+)$")
@@ -263,9 +273,6 @@ Module hasher
         'Next
         '
     End Function
-
-
-
 
     Public Function GetStribog(ByVal sfile As String) As String
 
@@ -344,14 +351,12 @@ Module hasher
 
     'End Function
 
-
     Public Function StrToByteArray(ByVal str As String) As Byte()
 
         Dim encoding As New System.Text.UTF8Encoding()
         Return encoding.GetBytes(str)
 
     End Function
-
 
     Public Function FileToByteArray(ByVal _FileName As String) As Byte()
         Dim _Buffer() As Byte = Nothing

@@ -1,18 +1,19 @@
 ﻿Imports System.IO
 Imports System.Threading
-
 Imports System.Collections
 Imports System.Management
 Imports System.ComponentModel
 Imports System.Text
 Imports Ionic.Zip
 
-
-
 Public Class MainForm
 
     Private MassDel As Boolean = False
     Private dvCOUNT As Integer
+    Public nudH As Integer
+    Public nudM As Integer
+    Public nudS As Integer
+
     Private rCOUNT As Integer
     Private Const CP_NOCLOSE_BUTTON As Integer = &H200
     Public typeCRC As String
@@ -59,9 +60,16 @@ Public Class MainForm
                     sSQL = "SELECT * FROM TBL_CONF"
                     rs = New Recordset
                     rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
                     With rs
                         typeCRC = .Fields("type").Value
                         LOG_EVT = .Fields("EVT").Value
+                        NEWFILES = .Fields("NEWFILES").Value
+
+                        nudH = .Fields("nudH").Value
+                        nudM = .Fields("nudM").Value
+                        nudS = .Fields("nudS").Value
+
                     End With
                     rs.Close()
                     rs = Nothing
@@ -71,7 +79,7 @@ Public Class MainForm
                     sSQL = "DELETE * FROM TBL_CONF"
                     DB7.Execute(sSQL)
 
-                    sSQL = "INSERT INTO [TBL_CONF]([type],[vers],[EVT]) VALUES('MD5','1','0')"
+                    sSQL = "INSERT INTO [TBL_CONF]([type],[vers],[EVT],[NEWFILES]) VALUES('MD5','2','0','0')"
                     DB7.Execute(sSQL)
 
                     Call typeCRCLoad()
@@ -111,13 +119,13 @@ Public Class MainForm
         lvFilesR.Columns.Add(("Контрольная сумма"), 100, HorizontalAlignment.Left)
         lvFilesR.Columns.Add(("Расчитанная КС"), 30, HorizontalAlignment.Left)
 
-
         lvFilesF.Columns.Add(("id"), 20, HorizontalAlignment.Left)
         lvFilesF.Columns.Add(("Имя файла"), 100, HorizontalAlignment.Left)
         lvFilesF.Columns.Add(("Контрольная сумма"), 100, HorizontalAlignment.Left)
 
         Call typeCRCLoad()
         ' Application.DoEvents()
+
 
         ThrTIMER_ = New System.Threading.Thread(AddressOf ThrTIMER)
         ThrTIMER_.Start()
@@ -127,8 +135,14 @@ Public Class MainForm
         'Application.DoEvents()
 
         'Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
-        Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+        ' Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
 
+        Select Case NEWFILES
+            Case 1
+                Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+            Case Else
+                Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+        End Select
 
     End Sub
 
@@ -178,9 +192,11 @@ Public Class MainForm
                     Call find_file_re()
 
             End Select
-            Me.Text = "Проверка контрольной суммы файлов" ' & " - поиск новых файлов"
+
+            Call MeText()
+
         Catch ex As Exception
-            Me.Text = "Проверка контрольной суммы файлов" ' & " - поиск новых файлов"
+            Call MeText()
         End Try
 
         ResList(lvFiles)
@@ -188,6 +204,36 @@ Public Class MainForm
         Me.Cursor = Cursors.Default
 
     End Sub
+
+    Public Sub MeText()
+
+        Select Case typeCRC
+            Case "MD5"
+                Me.Text = "Проверка контрольной суммы файлов (MD5)"
+            Case "Crc32"
+                Me.Text = "Проверка контрольной суммы файлов (CRC-32)"
+            Case "SHA256"
+                Me.Text = "Проверка контрольной суммы файлов (SHA-256)"
+            Case "SHA512"
+                Me.Text = "Проверка контрольной суммы файлов (SHA-512)"
+            Case "SHA1"
+                Me.Text = "Проверка контрольной суммы файлов (SHA-1)"
+            Case "Sha384"
+                Me.Text = "Проверка контрольной суммы файлов (SHA-384)"
+            Case "Crc64"
+                Me.Text = "Проверка контрольной суммы файлов (CRC-64)"
+            Case "Adler32"
+                Me.Text = "Проверка контрольной суммы файлов (ADLER-32)"
+            Case "ripmd160"
+                Me.Text = "Проверка контрольной суммы файлов (RIPEMD-160)"
+            Case "GOST"
+                Me.Text = "Проверка контрольной суммы файлов (GOST)"
+            Case Else
+                Me.Text = "Проверка контрольной суммы файлов"
+        End Select
+
+    End Sub
+
 
     Private Sub ADD_DIR()
 
@@ -214,11 +260,11 @@ Public Class MainForm
 
             BasePath = BasePath & "\"
 
-            AddLogEntr("Добавлен новый каталог: " & BasePath, 2)
-
-            DB7.Execute("INSERT INTO [TBL_DIR]([dir]) VALUES('" & BasePath & "')")
-
-            Call find_file()
+            If Not RSExistsDir(BasePath) Then
+                AddLogEntr("Добавлен новый каталог: " & BasePath, 2)
+                DB7.Execute("INSERT INTO [TBL_DIR]([dir]) VALUES('" & BasePath & "')")
+                Call find_file()
+            End If
 
         Catch ex As Exception
 
@@ -376,7 +422,8 @@ Public Class MainForm
 
                         Case "GOST"
 
-                            thisHash = GetStribog(dir)
+                            'thisHash = GetStribog(dir)
+                            ' thisHash = GetBlake2(dir)
 
                         Case Else
 
@@ -419,10 +466,7 @@ Public Class MainForm
                     pb1.Value = intcount
                 End If
 
-
             End If
-
-
 
         Next
 
@@ -540,7 +584,9 @@ Public Class MainForm
 
                             Case "GOST"
                                 '
-                                newHash = GetStribog(.Fields("file").Value)
+                                ' newHash = GetStribog(.Fields("file").Value)
+                                'newHash = GetBlake2(.Fields("file").Value)
+
 
                             Case "MAGMA"
 
@@ -558,7 +604,7 @@ Public Class MainForm
 
                         End Select
 
-                        If .Fields("hash").Value = newHash Then
+                        If UCase(.Fields("hash").Value) = newHash Then
 
                             lvFiles.Items(intcount).SubItems.Add("Соответствует")
 
@@ -964,7 +1010,8 @@ Public Class MainForm
 
                 Case "GOST"
 
-                    newHash = GetStribog(lvFiles.SelectedItems(intj).SubItems(1).Text)
+                    'newHash = GetStribog(lvFiles.SelectedItems(intj).SubItems(1).Text)
+                    'newHash = GetBlake2(lvFiles.SelectedItems(intj).SubItems(1).Text)
 
                 Case Else
 
@@ -1305,8 +1352,13 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
-                                    'Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    Select Case NEWFILES
+                                        Case 1
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                        Case Else
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    End Select
+
 
                             End Select
                     End Select
@@ -1318,7 +1370,12 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                    Select Case NEWFILES
+                                        Case 1
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                        Case Else
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    End Select
 
                             End Select
                     End Select
@@ -1330,7 +1387,12 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                    Select Case NEWFILES
+                                        Case 1
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                        Case Else
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    End Select
 
                             End Select
                     End Select
@@ -1342,7 +1404,12 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                    Select Case NEWFILES
+                                        Case 1
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                        Case Else
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    End Select
 
                             End Select
                     End Select
@@ -1354,7 +1421,12 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                    Select Case NEWFILES
+                                        Case 1
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                        Case Else
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    End Select
 
                             End Select
                     End Select
@@ -1366,7 +1438,12 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                    Select Case NEWFILES
+                                        Case 1
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                        Case Else
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    End Select
 
                             End Select
                     End Select
@@ -1378,7 +1455,12 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                    Select Case NEWFILES
+                                        Case 1
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                        Case Else
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    End Select
 
                             End Select
                     End Select
@@ -1390,18 +1472,23 @@ Public Class MainForm
                             Select Case TimeOfDay.Second
                                 Case 45
 
-                                    Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                    Select Case NEWFILES
+                                        Case 1
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf Find_New_Files))
+                                        Case Else
+                                            Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+                                    End Select
 
                             End Select
                     End Select
 
                     'Сохранение журналов операционной системы
-                Case 23
+                Case nudH
 
                     Select Case TimeOfDay.Minute
-                        Case 52
+                        Case nudM
                             Select Case TimeOfDay.Second
-                                Case 45
+                                Case nudS
 
                                     Select Case LOG_EVT
 
@@ -1552,7 +1639,8 @@ Public Class MainForm
 
                     Case "GOST"
 
-                        thisHash = GetStribog(fdlg.FileName)
+                        'thisHash = GetStribog(fdlg.FileName)
+                        ' thisHash = GetBlake2(fdlg.FileName)
 
                     Case Else
                         MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
@@ -1735,7 +1823,9 @@ Public Class MainForm
 
                                             Case "GOST"
                                                 ' thisHash = GetGOST(dir)
-                                                thisHash = GetStribog(dir)
+                                                'thisHash = GetStribog(dir)
+                                                'thisHash = GetBlake2(dir)
+
 
                                             Case Else
                                         End Select

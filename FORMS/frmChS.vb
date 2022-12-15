@@ -8,6 +8,14 @@
         Dim sCOUNT As Integer
         Dim rs As Recordset
 
+        MainForm.nudH = nudH.Value
+        MainForm.nudM = nudM.Value
+        MainForm.nudS = nudS.Value
+
+        DB7.Execute("UPDATE TBL_CONF SET nudH='" & nudH.Value & "'")
+        DB7.Execute("UPDATE TBL_CONF SET nudM='" & nudM.Value & "'")
+        DB7.Execute("UPDATE TBL_CONF SET nudS='" & nudS.Value & "'")
+
         sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
 
         rs = New Recordset
@@ -138,12 +146,13 @@
                         End With
                         rs.Close()
                         rs = Nothing
+
                         MainForm.lvFiles.Visible = True
-
+                        MainForm.AddLogEntr("Изменен алгоритм вычисления контрольной суммы с " & oldType & " на " & MainForm.typeCRC & vbCrLf & "Произведена очистка базы данных и пересчитаны контрольные суммы", 1)
+                        Call MainForm.MeText()
                 End Select
-            End If
 
-            MainForm.AddLogEntr("Изменен алгоритм вычисления контрольной суммы с " & oldType & " на " & MainForm.typeCRC & vbCrLf & "Произведена очистка базы данных и пересчитаны контрольные суммы", 1)
+            End If
 
         End If
 
@@ -193,6 +202,11 @@
                 rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
                 With rs
                     sTMP = .Fields("type").Value
+
+                    nudH.Value = .Fields("nudH").Value
+                    nudM.Value = .Fields("nudM").Value
+                    nudS.Value = .Fields("nudS").Value
+
                 End With
                 rs.Close()
                 rs = Nothing
@@ -259,6 +273,8 @@
 
         With rs
             LOG_EVT = .Fields("EVT").Value
+            NEWFILES = .Fields("NEWFILES").Value
+
         End With
         rs.Close()
         rs = Nothing
@@ -271,6 +287,17 @@
             Case Else
 
                 chkEVT.Checked = False
+
+        End Select
+
+        Select Case NEWFILES
+
+            Case "1"
+                chkNF.Checked = True
+
+            Case Else
+
+                chkNF.Checked = False
 
         End Select
 
@@ -309,11 +336,24 @@
             Case True
 
                 DB7.Execute("UPDATE TBL_CONF SET EVT='1'")
-
                 MainForm.LOG_EVT = True
+
+                nudH.Visible = True
+                nudM.Visible = True
+                nudS.Visible = True
+
+                MainForm.nudH = nudH.Value
+                MainForm.nudM = nudM.Value
+                MainForm.nudS = nudS.Value
+
             Case Else
                 DB7.Execute("UPDATE TBL_CONF SET EVT='0'")
                 MainForm.LOG_EVT = False
+
+                nudH.Visible = False
+                nudM.Visible = False
+                nudS.Visible = False
+
         End Select
 
 
@@ -329,5 +369,20 @@
 
     Private Sub rbRipMD_CheckedChanged(sender As Object, e As EventArgs) Handles rbRipMD.CheckedChanged
         MainForm.typeCRC = "ripmd160"
+    End Sub
+
+    Private Sub chkNF_CheckedChanged(sender As Object, e As EventArgs) Handles chkNF.CheckedChanged
+        Select Case chkEVT.Checked
+
+            Case True
+
+                DB7.Execute("UPDATE TBL_CONF SET NEWFILES='1'")
+
+                NEWFILES = 1
+            Case Else
+                DB7.Execute("UPDATE TBL_CONF SET NEWFILES='0'")
+                NEWFILES = 0
+
+        End Select
     End Sub
 End Class

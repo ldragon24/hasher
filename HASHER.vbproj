@@ -71,7 +71,7 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>chat-icon.ico</ApplicationIcon>
+    <ApplicationIcon>Home.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
@@ -179,6 +179,11 @@
     </Compile>
     <None Include="MODUL\HASHLIB\Magma.vb" />
     <None Include="MODUL\HASHLIB\sha224.vb" />
+    <None Include="MODUL\Blake2\Blake2S.vb" />
+    <None Include="MODUL\Blake2\Blake2sConfig.vb" />
+    <None Include="MODUL\Blake2\Blake2sCore.vb" />
+    <None Include="MODUL\Blake2\Blake2sHasher.vb" />
+    <None Include="MODUL\Blake2\Blake2sIvBuilder.vb" />
     <Compile Include="MODUL\CRC64.vb" />
     <Compile Include="MODUL\hesher.vb" />
     <Compile Include="MODUL\listtohtml.vb" />
