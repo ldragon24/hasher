@@ -12,10 +12,22 @@ Public Class frmAdd_dir
 
         Else
 
-            Call MainForm.find_file()
+            Select Case MainForm.lvFiles.Items.Count
+
+                Case 0
+                    Call MainForm.find_file()
+
+                Case Else
+
+                    If MsgBox("Хотите просканировать добавленные каталоги?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+
+                        Call MainForm.Find_New_Files()
+
+                    End If
+
+            End Select
+
         End If
-
-
 
     End Sub
 

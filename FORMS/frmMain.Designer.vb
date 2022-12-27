@@ -299,6 +299,7 @@ Partial Class MainForm
         '
         Me.MnuScanDir.Image = Global.HASHER.My.Resources.Resources.updatefolder
         Me.MnuScanDir.Name = "MnuScanDir"
+        Me.MnuScanDir.ShortcutKeys = System.Windows.Forms.Keys.F6
         Me.MnuScanDir.Size = New System.Drawing.Size(272, 22)
         Me.MnuScanDir.Text = "Поиск новых файлов"
         '
@@ -306,6 +307,7 @@ Partial Class MainForm
         '
         Me.findDouble.Image = Global.HASHER.My.Resources.Resources.update
         Me.findDouble.Name = "findDouble"
+        Me.findDouble.ShortcutKeys = System.Windows.Forms.Keys.F7
         Me.findDouble.Size = New System.Drawing.Size(272, 22)
         Me.findDouble.Text = "Поиск дубликатов"
         '

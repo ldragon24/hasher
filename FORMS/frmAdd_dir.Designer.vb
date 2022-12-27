@@ -70,7 +70,7 @@ Partial Class frmAdd_dir
         '
         Me.cmBmenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuDeltoBranch, Me.ToolStripMenuItem1})
         Me.cmBmenu.Name = "cmMENU"
-        Me.cmBmenu.Size = New System.Drawing.Size(184, 70)
+        Me.cmBmenu.Size = New System.Drawing.Size(184, 48)
         '
         'mnuDeltoBranch
         '

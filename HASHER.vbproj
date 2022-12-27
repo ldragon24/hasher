@@ -71,7 +71,7 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Home.ico</ApplicationIcon>
+    <ApplicationIcon>chat-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
@@ -107,8 +107,6 @@
   </ItemGroup>
   <ItemGroup>
     <Import Include="ADODB" />
-    <Import Include="HashLib" />
-    <Import Include="HashLib.Checksum" />
     <Import Include="JRO" />
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
@@ -120,7 +118,7 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdlerChecksum.vb" />
+    <None Include="MODUL\HASHLIB\AdlerChecksum.vb" />
     <Compile Include="ApplicationEvents.vb" />
     <Compile Include="FORMS\frmAbout.Designer.vb">
       <DependentUpon>frmAbout.vb</DependentUpon>
@@ -179,11 +177,11 @@
     </Compile>
     <None Include="MODUL\HASHLIB\Magma.vb" />
     <None Include="MODUL\HASHLIB\sha224.vb" />
-    <None Include="MODUL\Blake2\Blake2S.vb" />
-    <None Include="MODUL\Blake2\Blake2sConfig.vb" />
-    <None Include="MODUL\Blake2\Blake2sCore.vb" />
-    <None Include="MODUL\Blake2\Blake2sHasher.vb" />
-    <None Include="MODUL\Blake2\Blake2sIvBuilder.vb" />
+    <None Include="MODUL\HASHLIB\Blake2\Blake2S.vb" />
+    <None Include="MODUL\HASHLIB\Blake2\Blake2sConfig.vb" />
+    <None Include="MODUL\HASHLIB\Blake2\Blake2sCore.vb" />
+    <None Include="MODUL\HASHLIB\Blake2\Blake2sHasher.vb" />
+    <None Include="MODUL\HASHLIB\Blake2\Blake2sIvBuilder.vb" />
     <Compile Include="MODUL\CRC64.vb" />
     <Compile Include="MODUL\hesher.vb" />
     <Compile Include="MODUL\listtohtml.vb" />

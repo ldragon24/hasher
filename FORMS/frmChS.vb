@@ -124,39 +124,39 @@
 
                     Case Else
 
-                        sSQL = "Delete * from TBL_HASH"
-                        DB7.Execute(sSQL)
+                                sSQL = "Delete * from TBL_HASH"
+                                DB7.Execute(sSQL)
 
+                                sSQL = "SELECT * FROM TBL_DIR"
+                                rs = New Recordset
+                                rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
 
-                        sSQL = "SELECT * FROM TBL_DIR"
-                        rs = New Recordset
-                        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+                                MainForm.lvFiles.Visible = False
 
-                        MainForm.lvFiles.Visible = False
+                                With rs
+                                    .MoveFirst()
+                                    Do While Not .EOF
 
-                        With rs
-                            .MoveFirst()
-                            Do While Not .EOF
+                                        BasePath = .Fields("dir").Value
+                                        Call MainForm.find_file()
 
-                                BasePath = .Fields("dir").Value
-                                Call MainForm.find_file()
+                                        .MoveNext()
+                                    Loop
+                                End With
+                                rs.Close()
+                                rs = Nothing
 
-                                .MoveNext()
-                            Loop
-                        End With
-                        rs.Close()
-                        rs = Nothing
+                                MainForm.lvFiles.Visible = True
+                                MainForm.AddLogEntr("Изменен алгоритм вычисления контрольной суммы с " & oldType & " на " & MainForm.typeCRC & vbCrLf & "Произведена очистка базы данных и пересчитаны контрольные суммы", 1)
+                                Call MainForm.MeText()
 
-                        MainForm.lvFiles.Visible = True
-                        MainForm.AddLogEntr("Изменен алгоритм вычисления контрольной суммы с " & oldType & " на " & MainForm.typeCRC & vbCrLf & "Произведена очистка базы данных и пересчитаны контрольные суммы", 1)
-                        Call MainForm.MeText()
                 End Select
 
             End If
 
         End If
 
-        '        MainForm.LoadData()
+        MainForm.LoadData()
         Me.Close()
 
     End Sub
@@ -252,10 +252,33 @@
 
                 rbAdler.Checked = True
 
-
             Case "ripmd160"
 
                 rbRipMD.Checked = True
+
+            Case "HMACSHA256"
+
+                rbhSHA256.Checked = True
+
+            Case "HMACMD5"
+
+                rbhMD5.Checked = True
+
+            Case "HMACRIPEMD"
+
+                rbhRipMD.Checked = True
+
+            Case "HMACSHA1"
+
+                rbhSHA1.Checked = True
+
+            Case "HMACSHA384"
+
+                rbhSHA384.Checked = True
+
+            Case "HMACSHA512"
+
+                rbhSHA512.Checked = True
 
             Case Else
 
@@ -317,9 +340,7 @@
     End Sub
 
     Private Sub rbSHA384_CheckedChanged(sender As Object, e As EventArgs) Handles rbSHA384.CheckedChanged
-        ' MainForm.typeCRC = "GOST"
 
-        'GetSha384Hash()
         MainForm.typeCRC = "Sha384"
 
     End Sub
@@ -356,7 +377,6 @@
 
         End Select
 
-
     End Sub
 
     Private Sub rbCRC64_CheckedChanged(sender As Object, e As EventArgs) Handles rbCRC64.CheckedChanged
@@ -384,5 +404,29 @@
                 NEWFILES = 0
 
         End Select
+    End Sub
+
+    Private Sub rbhMD5_CheckedChanged(sender As Object, e As EventArgs) Handles rbhMD5.CheckedChanged
+        MainForm.typeCRC = "HMACMD5"
+    End Sub
+
+    Private Sub rbhRipMD_CheckedChanged(sender As Object, e As EventArgs) Handles rbhRipMD.CheckedChanged
+        MainForm.typeCRC = "HMACRIPEMD"
+    End Sub
+
+    Private Sub rbhSHA1_CheckedChanged(sender As Object, e As EventArgs) Handles rbhSHA1.CheckedChanged
+        MainForm.typeCRC = "HMACSHA1"
+    End Sub
+
+    Private Sub rbhSHA256_CheckedChanged(sender As Object, e As EventArgs) Handles rbhSHA256.CheckedChanged
+        MainForm.typeCRC = "HMACSHA256"
+    End Sub
+
+    Private Sub rbhSHA384_CheckedChanged(sender As Object, e As EventArgs) Handles rbhSHA384.CheckedChanged
+        MainForm.typeCRC = "HMACSHA384"
+    End Sub
+
+    Private Sub rbhSHA512_CheckedChanged(sender As Object, e As EventArgs) Handles rbhSHA512.CheckedChanged
+        MainForm.typeCRC = "HMACSHA512"
     End Sub
 End Class

@@ -5,6 +5,7 @@ Imports System.Management
 Imports System.ComponentModel
 Imports System.Text
 Imports Ionic.Zip
+Imports GostPlugin.Magma
 
 Public Class MainForm
 
@@ -20,6 +21,7 @@ Public Class MainForm
     Public LOG_EVT As Boolean = False
 
     Public ThrTIMER_ As System.Threading.Thread
+    Public ThrTIMER_evt As System.Threading.Thread
 
     Public lvForm As String
 
@@ -93,9 +95,9 @@ Public Class MainForm
     Private Sub MainForm_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
 
         ThrTIMER_.Abort()
+        ThrTIMER_evt.Abort()
         UnLoadDatabase()
         ni.Visible = False
-
 
     End Sub
 
@@ -126,9 +128,11 @@ Public Class MainForm
         Call typeCRCLoad()
         ' Application.DoEvents()
 
-
         ThrTIMER_ = New System.Threading.Thread(AddressOf ThrTIMER)
         ThrTIMER_.Start()
+
+        ThrTIMER_evt = New System.Threading.Thread(AddressOf ThrTIMER_2)
+        ThrTIMER_evt.Start()
 
         'Application.DoEvents()
         'Me.Show()
@@ -190,8 +194,8 @@ Public Class MainForm
                     pb1.Maximum = sCOUNT + 1
                     pb1.Minimum = 0
                     Call find_file_re()
-
             End Select
+
 
             Call MeText()
 
@@ -202,6 +206,53 @@ Public Class MainForm
         ResList(lvFiles)
 
         Me.Cursor = Cursors.Default
+
+    End Sub
+
+    Private Sub STAT_INF()
+
+        Dim sCOUNT As Integer
+        Dim sSQL As String
+
+        sSQL = "SELECT count(*) as t_n FROM TBL_HASH"
+
+        Dim rs As Recordset
+        rs = New Recordset
+        rs.Open(sSQL, DB7, CursorTypeEnum.adOpenDynamic, LockTypeEnum.adLockOptimistic)
+
+        With rs
+            sCOUNT = .Fields("t_n").Value
+        End With
+        rs.Close()
+        rs = Nothing
+
+        Select Case sCOUNT
+
+            Case 0
+                stlabel.Text = "Записей в базе не найдено"
+                UpdateList.Enabled = False
+                SaveList.Enabled = False
+                ClearDB.Enabled = False
+                findDouble.Enabled = False
+                pb1.Visible = False
+                stat2.Text = "Изменений в файлах не зафиксировано"
+                notfind.Text = "Все файлы в наличии"
+                stat2.ForeColor = Color.Green
+                notfind.ForeColor = Color.Green
+
+            Case Else
+
+                stlabel.Text = "Записей в базе: " & sCOUNT
+                UpdateList.Enabled = True
+                ClearDB.Enabled = True
+                SaveList.Enabled = True
+                findDouble.Enabled = True
+                stat2.Text = "Изменений в файлах не зафиксировано"
+                notfind.Text = "Все файлы в наличии"
+                stat2.ForeColor = Color.Green
+                notfind.ForeColor = Color.Green
+        End Select
+
 
     End Sub
 
@@ -228,12 +279,36 @@ Public Class MainForm
                 Me.Text = "Проверка контрольной суммы файлов (RIPEMD-160)"
             Case "GOST"
                 Me.Text = "Проверка контрольной суммы файлов (GOST)"
+
+            Case "HMACSHA256"
+
+                Me.Text = "Проверка контрольной суммы файлов (HMAC-SHA256)"
+
+            Case "HMACMD5"
+
+                Me.Text = "Проверка контрольной суммы файлов (HMAC-MD5)"
+
+            Case "HMACRIPEMD"
+
+                Me.Text = "Проверка контрольной суммы файлов (HMAC-RIPEMD160)"
+
+            Case "HMACSHA1"
+
+                Me.Text = "Проверка контрольной суммы файлов (HMAC-SHA1)"
+
+            Case "HMACSHA384"
+
+                Me.Text = "Проверка контрольной суммы файлов (HMAC-SHA384)"
+
+            Case "HMACSHA512"
+
+                Me.Text = "Проверка контрольной суммы файлов (HMAC-SHA512)"
+
             Case Else
                 Me.Text = "Проверка контрольной суммы файлов"
         End Select
 
     End Sub
-
 
     Private Sub ADD_DIR()
 
@@ -354,18 +429,23 @@ Public Class MainForm
 
         lvFiles.Sorting = SortOrder.None
         lvFiles.ListViewItemSorter = Nothing
-        lvFiles.Items.Clear()
-
         Dim intcount As Integer
         Dim thisHash As String
-        intcount = 0
-
         Dim dirs() As String = System.IO.Directory.GetFiles(BasePath, "*.*", SearchOption.AllDirectories)
-
         Dim dir As String
 
+        If lvFiles.Items.Count <> 0 Then
+            intcount = lvFiles.Items.Count
+            pb1.Maximum = dirs.Length + lvFiles.Items.Count
+        Else
+            pb1.Maximum = dirs.Length
+            intcount = 0
+            lvFiles.Items.Clear()
+
+        End If
+
         pb1.Visible = True
-        pb1.Maximum = dirs.Length
+
 
         For Each dir In dirs
 
@@ -379,62 +459,14 @@ Public Class MainForm
 
                 If Not File_ignore(dir) Then
 
-
                     lvFiles.Items.Add(lvFiles.Items.Count + 1)
                     lvFiles.Items(intcount).SubItems.Add(dir)
 
-                    Select Case typeCRC
-
-                        Case "MD5"
-                            thisHash = GetHash(dir)
-
-                        Case "Crc32"
-
-                            thisHash = GetCRC32(dir)
-
-                        Case "SHA256"
-
-                            thisHash = GetSHA256(dir)
-
-                        Case "SHA512"
-
-                            thisHash = GetSHA512(dir)
-
-                        Case "SHA1"
-
-                            thisHash = GetSHA1(dir)
-
-                        Case "Sha384"
-
-                            thisHash = GetSha384Hash(dir)
-
-
-                        Case "Crc64"
-
-                            thisHash = GetCRC64(dir)
-
-                        Case "Adler32"
-
-                            thisHash = GetAdler32(dir)
-
-                        Case "ripmd160"
-                            thisHash = GetRipEmd(dir)
-
-                        Case "GOST"
-
-                            'thisHash = GetStribog(dir)
-                            ' thisHash = GetBlake2(dir)
-
-                        Case Else
-
-                            MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
-
-                            frmChS.ShowDialog(Me)
-
-                    End Select
+                    thisHash = GettHash(dir)
 
                     lvFiles.Items(intcount).SubItems.Add(thisHash)
-
+                    lvFiles.Items(intcount).SubItems.Add("Добавлено")
+                    lvFiles.Items(intcount).SubItems.Add(DateAndTime.Now)
                     Dim sSQL As String
                     Dim sCOUNT As Integer
 
@@ -474,7 +506,8 @@ Public Class MainForm
         ResList(lvFiles)
         'End Try
 
-        Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
+        Me.BeginInvoke(New MethodInvoker(AddressOf STAT_INF))
+        ' Me.BeginInvoke(New MethodInvoker(AddressOf LoadData))
 
     End Sub
 
@@ -536,75 +569,15 @@ Public Class MainForm
                     uname1 = .Fields("hash").Value
 
 
-                    Dim newHash As String
+                    Dim thisHash As String
 
 
                     If IO.File.Exists(.Fields("file").Value) Then
 
 
-                        ' typeCRC = "SHA224"
+                        thisHash = GettHash(.Fields("file").Value)
 
-
-                        Select Case typeCRC
-
-                            Case "MD5"
-                                newHash = GetHash(.Fields("file").Value)
-
-                            Case "Crc32"
-
-                                newHash = GetCRC32(.Fields("file").Value)
-
-                            Case "SHA256"
-
-                                newHash = GetSHA256(.Fields("file").Value)
-
-                            Case "SHA1"
-
-                                newHash = GetSHA1(.Fields("file").Value)
-
-
-                            Case "SHA512"
-
-                                newHash = GetSHA512(.Fields("file").Value)
-
-                            Case "Sha384"
-
-                                newHash = GetSha384Hash(.Fields("file").Value)
-
-                            Case "Crc64"
-
-                                newHash = GetCRC64(.Fields("file").Value)
-
-                            Case "Adler32"
-
-                                newHash = GetAdler32(.Fields("file").Value)
-
-                            Case "ripmd160"
-                                newHash = GetRipEmd(.Fields("file").Value)
-
-                            Case "GOST"
-                                '
-                                ' newHash = GetStribog(.Fields("file").Value)
-                                'newHash = GetBlake2(.Fields("file").Value)
-
-
-                            Case "MAGMA"
-
-                                'newHash = GetMagMa(.Fields("file").Value)
-
-                            Case "SHA224"
-
-                                newHash = GetSHA224(.Fields("file").Value)
-
-                            Case Else
-
-                                MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
-
-                                frmChS.ShowDialog(Me)
-
-                        End Select
-
-                        If UCase(.Fields("hash").Value) = newHash Then
+                        If UCase(.Fields("hash").Value) = thisHash Then
 
                             lvFiles.Items(intcount).SubItems.Add("Соответствует")
 
@@ -614,11 +587,10 @@ Public Class MainForm
                             lvFilesR.Items.Add(.Fields("id").Value)
                             lvFilesR.Items(intj).SubItems.Add(.Fields("file").Value)
                             lvFilesR.Items(intj).SubItems.Add(.Fields("hash").Value)
-                            lvFilesR.Items(intj).SubItems.Add(newHash)
+                            lvFilesR.Items(intj).SubItems.Add(thisHash)
 
                             intj = intj + 1
                             'Если хэш не соответствует то
-
 
                             lvFiles.Items(intcount).SubItems.Add("Не соответствует")
 
@@ -628,11 +600,9 @@ Public Class MainForm
 
                             If Not RsExistTXT(.Fields("file").Value, .Fields("hash").Value, "zfile") Then
                                 Dim d = Now
-                                IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Обнаружены изменения в файле: " & "|" & .Fields("file").Value & "|" & " Записанная контрольная сумма: " & "|" & .Fields("hash").Value & "|" & " не соответствует текущей: " & "|" & newHash & vbNewLine, System.Text.Encoding.Default)
+                                IO.File.AppendAllText(Application.StartupPath & "\change.log", d & "|" & "Обнаружены изменения в файле: " & "|" & .Fields("file").Value & "|" & " Записанная контрольная сумма: " & "|" & .Fields("hash").Value & "|" & " не соответствует текущей: " & "|" & thisHash & vbNewLine, System.Text.Encoding.Default)
 
-                                ' My.Application.Log.WriteEntry("Обнаружены изменения в файле: " & .Fields("file").Value & " Записанная контрольная сумма: " & .Fields("hash").Value & " не соответствует текущей: " & newHash, TraceEventType.Warning)
-
-                                AddLogEntr("Обнаружены изменения в файле: " & .Fields("file").Value & vbCrLf & " Записанная контрольная сумма: " & .Fields("hash").Value & " не соответствует текущей: " & newHash, 1)
+                                AddLogEntr("Обнаружены изменения в файле: " & .Fields("file").Value & vbCrLf & " Записанная контрольная сумма: " & .Fields("hash").Value & " не соответствует текущей: " & thisHash, 1)
 
                             End If
 
@@ -959,7 +929,7 @@ Public Class MainForm
 
     Private Sub RepAddBrToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RepAddBrToolStripMenuItem.Click
 
-        If MsgBox("Выбранные изменения будут приняты" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+        If MsgBox("Данные о файле будут перезаписаны" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
             Dim intj As Integer
 
@@ -969,69 +939,19 @@ Public Class MainForm
             Next
 
 
-            Dim newHash As String ' = GetHash(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-
-            Select Case typeCRC
-
-                Case "MD5"
-                    newHash = GetHash(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "Crc32"
-
-                    newHash = GetCRC32(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "SHA256"
-
-                    newHash = GetSHA256(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "SHA512"
-
-                    newHash = GetSHA512(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "SHA1"
-
-                    newHash = GetSHA1(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "Sha384"
-
-                    newHash = GetSha384Hash(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "Crc64"
-
-                    newHash = GetCRC64(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "Adler32"
-
-                    newHash = GetAdler32(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "ripmd160"
-                    newHash = GetRipEmd(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case "GOST"
-
-                    'newHash = GetStribog(lvFiles.SelectedItems(intj).SubItems(1).Text)
-                    'newHash = GetBlake2(lvFiles.SelectedItems(intj).SubItems(1).Text)
-
-                Case Else
-
-                    MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
-
-                    frmChS.ShowDialog(Me)
-
-            End Select
-
+            Dim thisHash As String
+            thisHash = GettHash(lvFiles.SelectedItems(intj).SubItems(1).Text)
 
             Dim sSQL As String
 
             Try
 
-                sSQL = "UPDATE TBL_HASH SET hash='" & newHash & "', dttm='" & DateAndTime.Now.ToString & "' WHERE id =" & rCOUNT
+                sSQL = "UPDATE TBL_HASH SET hash='" & thisHash & "', dttm='" & DateAndTime.Now.ToString & "' WHERE id =" & rCOUNT
                 DB7.Execute(sSQL)
 
-                AddLogEntr("Записана новая контрольная сумма для файла: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Контрольная сумма: " & newHash & vbCrLf & "Старая контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
+                AddLogEntr("Записана новая контрольная сумма для файла: " & lvFiles.SelectedItems(intj).SubItems(1).Text & vbCrLf & "Контрольная сумма: " & thisHash & vbCrLf & "Старая контрольная сумма: " & lvFiles.SelectedItems(intj).SubItems(2).Text, 1)
 
-                lvFiles.SelectedItems(intj).SubItems(2).Text = newHash
+                lvFiles.SelectedItems(intj).SubItems(2).Text = thisHash
                 lvFiles.SelectedItems(intj).SubItems(3).Text = "Соответствует"
                 lvFiles.SelectedItems(intj).SubItems(4).Text = DateAndTime.Now.ToString
                 lvFiles.SelectedItems(CInt(intj)).ForeColor = Color.Black
@@ -1161,6 +1081,7 @@ Public Class MainForm
         If MsgBox("Работа программы будет завершена" & vbCrLf & "Хотите продолжить?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
 
             ThrTIMER_.Abort()
+            ThrTIMER_evt.Abort()
             Call COMPARE_DB()
             UnLoadDatabase()
             ni.Visible = False
@@ -1482,7 +1403,22 @@ Public Class MainForm
                             End Select
                     End Select
 
-                    'Сохранение журналов операционной системы
+            End Select
+
+            Threading.Thread.Sleep(1000)
+
+        Loop
+
+
+    End Sub
+
+    Sub ThrTIMER_2()
+
+        'Сохранение журналов операционной системы
+        Do
+
+            Select Case TimeOfDay.Hour
+
                 Case nudH
 
                     Select Case TimeOfDay.Minute
@@ -1501,13 +1437,11 @@ Public Class MainForm
                             End Select
                     End Select
 
-
-
             End Select
 
             Threading.Thread.Sleep(1000)
-
         Loop
+
 
     End Sub
 
@@ -1605,49 +1539,7 @@ Public Class MainForm
 
                 Dim thisHash As String
 
-                Select Case typeCRC
-
-                    Case "MD5"
-                        thisHash = GetHash(fdlg.FileName)
-
-                    Case "Crc32"
-                        thisHash = GetCRC32(fdlg.FileName)
-
-                    Case "SHA256"
-                        thisHash = GetSHA256(fdlg.FileName)
-
-                    Case "SHA512"
-                        thisHash = GetSHA512(fdlg.FileName)
-
-                    Case "SHA1"
-                        thisHash = GetSHA1(fdlg.FileName)
-
-                    Case "Sha384"
-
-                        thisHash = GetSha384Hash(fdlg.FileName)
-
-                    Case "Crc64"
-                        thisHash = GetCRC64(fdlg.FileName)
-
-                    Case "Adler32"
-
-                        thisHash = GetAdler32(fdlg.FileName)
-
-                    Case "ripmd160"
-
-                        thisHash = GetRipEmd(fdlg.FileName)
-
-                    Case "GOST"
-
-                        'thisHash = GetStribog(fdlg.FileName)
-                        ' thisHash = GetBlake2(fdlg.FileName)
-
-                    Case Else
-                        MsgBox("Не выбран алгоритм вычисления контрольной суммы", MsgBoxStyle.Critical)
-
-                        frmChS.ShowDialog(Me)
-
-                End Select
+                thisHash = GettHash(fdlg.FileName)
 
                 If Not RSExistsHash(fdlg.FileName) Then
                     ADD_DB_HASH(fdlg.FileName, thisHash, DateAndTime.Now)
@@ -1799,36 +1691,7 @@ Public Class MainForm
 
                                     If Not RSExistsHash(dir) Then
 
-                                        Select Case typeCRC
-                                            Case "MD5"
-                                                thisHash = GetHash(dir)
-                                            Case "Crc32"
-                                                thisHash = GetCRC32(dir)
-                                            Case "SHA256"
-                                                thisHash = GetSHA256(dir)
-                                            Case "SHA512"
-                                                thisHash = GetSHA512(dir)
-                                            Case "SHA1"
-                                                thisHash = GetSHA1(dir)
-                                            Case "Sha384"
-                                                thisHash = GetSha384Hash(dir)
-                                            Case "Crc64"
-                                                thisHash = GetCRC64(dir)
-
-                                            Case "Adler32"
-                                                thisHash = GetAdler32(dir)
-
-                                            Case "ripmd160"
-                                                thisHash = GetRipEmd(dir)
-
-                                            Case "GOST"
-                                                ' thisHash = GetGOST(dir)
-                                                'thisHash = GetStribog(dir)
-                                                'thisHash = GetBlake2(dir)
-
-
-                                            Case Else
-                                        End Select
+                                        thisHash = GettHash(dir)
 
                                         ADD_DB_HASH(dir, thisHash, DateAndTime.Now)
 
